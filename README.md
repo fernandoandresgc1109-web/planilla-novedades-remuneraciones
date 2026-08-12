@@ -159,7 +159,7 @@ Cada jornada de trabajo finalizará con:
 - [x] Definición del problema y los objetivos.
 - [x] Selección del stack tecnológico.
 - [x] Documentación inicial del proyecto.
-- [ ] Preparación del entorno de desarrollo.
+- [x] Preparación del entorno de desarrollo.
 - [ ] Creación del proyecto Django.
 - [ ] Diseño del modelo entidad-relación.
 - [ ] Desarrollo de los modelos.
@@ -176,6 +176,7 @@ Cada jornada de trabajo finalizará con:
 | Fecha | Actividad | Resultado |
 |---|---|---|
 | 10-08-2026 | Planificación inicial y actualización del README | Definición del problema, objetivos, alcance, stack tecnológico, metodología y ruta de desarrollo. |
+| 11-08-2026 | Preparación del entorno local | Se verificaron Python 3.14.7, Git 2.55.0, Visual Studio Code 1.132.0, Node.js 24.19.0 y npm 11.17.0; se instaló PostgreSQL 18.4 con pgAdmin 4; se creó el entorno virtual `.venv` y se instalaron Django 5.2.17 LTS, Django REST Framework 3.18.0 y Psycopg 3.3.4. Las dependencias quedaron registradas en `requirements.txt`. |
 
 ## Consideraciones de privacidad
 
