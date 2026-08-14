@@ -4,7 +4,7 @@
 
 ## Estado del proyecto
 
-*Fase actual:* planificación y documentación inicial.
+Fase actual: diseño del modelo de datos y preparación para el desarrollo de los modelos Django.
 
 *Fecha de inicio:* 10 de agosto de 2026.  
 *Fecha límite:* 10 de septiembre de 2026.
@@ -152,6 +152,13 @@ Cada jornada de trabajo finalizará con:
 4. Creación de un commit.
 5. Envío de los cambios a GitHub.
 
+## Documentación técnica
+
+- [Modelo entidad-relación](docs/modelo-entidad-relacion.md): presenta las entidades, relaciones, cardinalidades y decisiones de diseño.
+- [Diccionario de datos](docs/diccionario-datos.md): define los campos, tipos, restricciones y reglas de negocio de la base de datos.
+
+Los archivos reales utilizados para analizar el proceso no se incluyen en el repositorio porque contienen información personal, bancaria, previsional y salarial.
+
 ## Ruta de desarrollo
 
 - [x] Aprobación de la idea por parte del docente.
@@ -161,7 +168,7 @@ Cada jornada de trabajo finalizará con:
 - [x] Documentación inicial del proyecto.
 - [x] Preparación del entorno de desarrollo.
 - [x] Creación del proyecto Django.
-- [ ] Diseño del modelo entidad-relación.
+- [x] Diseño del modelo entidad-relación.
 - [ ] Desarrollo de los modelos.
 - [ ] Desarrollo de la API REST.
 - [ ] Desarrollo de la interfaz web.
@@ -178,6 +185,7 @@ Cada jornada de trabajo finalizará con:
 | 10-08-2026 | Planificación inicial y actualización del README | Definición del problema, objetivos, alcance, stack tecnológico, metodología y ruta de desarrollo. |
 | 11-08-2026 | Preparación del entorno local | Se verificaron Python 3.14.7, Git 2.55.0, Visual Studio Code 1.132.0, Node.js 24.19.0 y npm 11.17.0; se instaló PostgreSQL 18.4 con pgAdmin 4; se creó el entorno virtual `.venv` y se instalaron Django 5.2.17 LTS, Django REST Framework 3.18.0 y Psycopg 3.3.4. Las dependencias quedaron registradas en `requirements.txt`. |
 | 13-08-2026 | Creación y configuración inicial del proyecto Django | Se creó el proyecto Django y la aplicación `novedades`; se configuró la conexión segura con PostgreSQL mediante variables de entorno; se aplicaron las migraciones iniciales; se registró Django REST Framework; se prepararon las carpetas de plantillas y archivos estáticos; se creó la página principal y se ejecutó correctamente la primera prueba automática. |
+| 14-08-2026 | Diseño del modelo entidad-relación | Se analizaron la planilla Excel y las liquidaciones generadas por Nubox; se definieron las entidades, relaciones, cardinalidades, campos, reglas de negocio, tratamiento de datos sensibles y límites del cálculo legal. Se documentaron el diagrama entidad-relación y el diccionario de datos. |
 
 ## Consideraciones de privacidad
 
