@@ -4,7 +4,7 @@
 
 ## Estado del proyecto
 
-Fase actual: diseño del modelo de datos y preparación para el desarrollo de los modelos Django.
+Fase actual: modelos de dominio implementados y preparación para el desarrollo de la API REST.
 
 *Fecha de inicio:* 10 de agosto de 2026.  
 *Fecha límite:* 10 de septiembre de 2026.
@@ -169,7 +169,7 @@ Los archivos reales utilizados para analizar el proceso no se incluyen en el rep
 - [x] Preparación del entorno de desarrollo.
 - [x] Creación del proyecto Django.
 - [x] Diseño del modelo entidad-relación.
-- [ ] Desarrollo de los modelos.
+- [x] Desarrollo de los modelos.
 - [ ] Desarrollo de la API REST.
 - [ ] Desarrollo de la interfaz web.
 - [ ] Implementación de las validaciones.
@@ -186,6 +186,7 @@ Los archivos reales utilizados para analizar el proceso no se incluyen en el rep
 | 11-08-2026 | Preparación del entorno local | Se verificaron Python 3.14.7, Git 2.55.0, Visual Studio Code 1.132.0, Node.js 24.19.0 y npm 11.17.0; se instaló PostgreSQL 18.4 con pgAdmin 4; se creó el entorno virtual `.venv` y se instalaron Django 5.2.17 LTS, Django REST Framework 3.18.0 y Psycopg 3.3.4. Las dependencias quedaron registradas en `requirements.txt`. |
 | 13-08-2026 | Creación y configuración inicial del proyecto Django | Se creó el proyecto Django y la aplicación `novedades`; se configuró la conexión segura con PostgreSQL mediante variables de entorno; se aplicaron las migraciones iniciales; se registró Django REST Framework; se prepararon las carpetas de plantillas y archivos estáticos; se creó la página principal y se ejecutó correctamente la primera prueba automática. |
 | 14-08-2026 | Diseño del modelo entidad-relación | Se analizaron la planilla Excel y las liquidaciones generadas por Nubox; se definieron las entidades, relaciones, cardinalidades, campos, reglas de negocio, tratamiento de datos sensibles y límites del cálculo legal. Se documentaron el diagrama entidad-relación y el diccionario de datos. |
+| 15-08-2026 | Desarrollo de los modelos de dominio | Se implementaron los 10 modelos del sistema con sus relaciones, opciones controladas, validadores y restricciones de integridad; se generó y aplicó la migración inicial en PostgreSQL; se registraron los modelos en el panel administrativo y se ejecutaron correctamente 8 pruebas automáticas. |
 
 ## Consideraciones de privacidad
 
