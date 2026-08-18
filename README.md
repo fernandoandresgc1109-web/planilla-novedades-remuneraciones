@@ -4,7 +4,7 @@
 
 ## Estado del proyecto
 
-Fase actual: modelos de dominio implementados y preparación para el desarrollo de la API REST.
+Fase actual: API REST implementada y preparación para el desarrollo de la interfaz web.
 
 *Fecha de inicio:* 10 de agosto de 2026.  
 *Fecha límite:* 10 de septiembre de 2026.
@@ -156,6 +156,7 @@ Cada jornada de trabajo finalizará con:
 
 - [Modelo entidad-relación](docs/modelo-entidad-relacion.md): presenta las entidades, relaciones, cardinalidades y decisiones de diseño.
 - [Diccionario de datos](docs/diccionario-datos.md): define los campos, tipos, restricciones y reglas de negocio de la base de datos.
+- [API REST](docs/api-rest.md): documenta las rutas, autenticación, permisos, paginación, operaciones y pruebas automatizadas de la API.
 
 Los archivos reales utilizados para analizar el proceso no se incluyen en el repositorio porque contienen información personal, bancaria, previsional y salarial.
 
@@ -170,7 +171,7 @@ Los archivos reales utilizados para analizar el proceso no se incluyen en el rep
 - [x] Creación del proyecto Django.
 - [x] Diseño del modelo entidad-relación.
 - [x] Desarrollo de los modelos.
-- [ ] Desarrollo de la API REST.
+- [x] Desarrollo de la API REST.
 - [ ] Desarrollo de la interfaz web.
 - [ ] Implementación de las validaciones.
 - [ ] Implementación de las exportaciones.
@@ -187,6 +188,7 @@ Los archivos reales utilizados para analizar el proceso no se incluyen en el rep
 | 13-08-2026 | Creación y configuración inicial del proyecto Django | Se creó el proyecto Django y la aplicación `novedades`; se configuró la conexión segura con PostgreSQL mediante variables de entorno; se aplicaron las migraciones iniciales; se registró Django REST Framework; se prepararon las carpetas de plantillas y archivos estáticos; se creó la página principal y se ejecutó correctamente la primera prueba automática. |
 | 14-08-2026 | Diseño del modelo entidad-relación | Se analizaron la planilla Excel y las liquidaciones generadas por Nubox; se definieron las entidades, relaciones, cardinalidades, campos, reglas de negocio, tratamiento de datos sensibles y límites del cálculo legal. Se documentaron el diagrama entidad-relación y el diccionario de datos. |
 | 15-08-2026 | Desarrollo de los modelos de dominio | Se implementaron los 10 modelos del sistema con sus relaciones, opciones controladas, validadores y restricciones de integridad; se generó y aplicó la migración inicial en PostgreSQL; se registraron los modelos en el panel administrativo y se ejecutaron correctamente 8 pruebas automáticas. |
+| 18-08-2026 | Desarrollo de la API REST | Se implementaron serializadores y endpoints CRUD para los 10 modelos del dominio; se configuraron autenticación por sesión, permisos para usuarios autenticados, paginación de 25 registros y trazabilidad automática de novedades y exportaciones. Se documentó la API y se ejecutaron correctamente 13 pruebas automáticas. |
 
 ## Consideraciones de privacidad
 
