@@ -1,21 +1,499 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="description"
+        content="Aplicación web para automatizar la captura, validación y exportación de novedades de remuneraciones en Alimentos Rancagua SpA."
+    >
+    <meta name="theme-color" content="#052e16">
+
     <title>Planilla de Novedades de Remuneraciones</title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'novedades/css/landing.css' %}"
+    >
+    <script
+        src="{% static 'novedades/js/landing.js' %}"
+        defer
+    ></script>
 </head>
-<body>
-    <header>
-        <h1>Planilla de Novedades de Remuneraciones</h1>
-        <p>Alimentos Rancagua SpA</p>
+
+<body class="min-h-screen overflow-x-hidden bg-slate-50 text-slate-900">
+    <a
+        href="#contenido"
+        class="sr-only z-[100] rounded-lg bg-white px-4 py-3 font-semibold text-brand-800 focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
+    >
+        Saltar al contenido
+    </a>
+
+    <header class="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
+        <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
+            <a href="#inicio" class="flex items-center gap-3" aria-label="Ir al inicio">
+                <span class="grid size-11 place-items-center rounded-2xl bg-brand-800 text-sm font-black text-white shadow-lg shadow-brand-900/20">
+                    NR
+                </span>
+
+                <span>
+                    <span class="block text-sm font-bold text-slate-950">
+                        Novedades de Remuneraciones
+                    </span>
+                    <span class="block text-xs text-slate-500">
+                        Alimentos Rancagua SpA
+                    </span>
+                </span>
+            </a>
+
+            <nav class="hidden items-center gap-7 lg:flex" aria-label="Navegación principal">
+                <a class="text-sm font-semibold text-slate-600 transition hover:text-brand-700" href="#proyecto">
+                    El proyecto
+                </a>
+                <a class="text-sm font-semibold text-slate-600 transition hover:text-brand-700" href="#solucion">
+                    Solución
+                </a>
+                <a class="text-sm font-semibold text-slate-600 transition hover:text-brand-700" href="#flujo">
+                    Flujo
+                </a>
+                <a class="text-sm font-semibold text-slate-600 transition hover:text-brand-700" href="#tecnologia">
+                    Tecnología
+                </a>
+                <a class="text-sm font-semibold text-slate-600 transition hover:text-brand-700" href="#seguridad">
+                    Seguridad
+                </a>
+            </nav>
+
+            <div class="hidden lg:block">
+                <a
+                    href="{% url 'admin:index' %}"
+                    class="inline-flex items-center justify-center rounded-xl bg-brand-700 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-brand-900/15 transition hover:-translate-y-0.5 hover:bg-brand-800"
+                >
+                    Acceso interno
+                </a>
+            </div>
+
+            <button
+                type="button"
+                class="inline-flex size-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 lg:hidden"
+                aria-controls="menu-movil"
+                aria-expanded="false"
+                data-menu-button
+            >
+                <span class="sr-only">Abrir menú principal</span>
+
+                <svg data-menu-open class="size-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M4 7H20M4 12H20M4 17H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+
+                <svg data-menu-close class="hidden size-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </button>
+        </div>
+
+        <nav
+            id="menu-movil"
+            class="hidden border-t border-slate-200 bg-white px-6 py-5 lg:hidden"
+            aria-label="Navegación móvil"
+            data-mobile-menu
+        >
+            <div class="flex flex-col gap-2">
+                <a class="rounded-lg px-3 py-3 font-semibold text-slate-700 hover:bg-brand-50" href="#proyecto">El proyecto</a>
+                <a class="rounded-lg px-3 py-3 font-semibold text-slate-700 hover:bg-brand-50" href="#solucion">Solución</a>
+                <a class="rounded-lg px-3 py-3 font-semibold text-slate-700 hover:bg-brand-50" href="#flujo">Flujo</a>
+                <a class="rounded-lg px-3 py-3 font-semibold text-slate-700 hover:bg-brand-50" href="#tecnologia">Tecnología</a>
+                <a class="rounded-lg px-3 py-3 font-semibold text-slate-700 hover:bg-brand-50" href="#seguridad">Seguridad</a>
+                <a class="mt-2 rounded-xl bg-brand-700 px-4 py-3 text-center font-bold text-white" href="{% url 'admin:index' %}">
+                    Acceso interno
+                </a>
+            </div>
+        </nav>
     </header>
 
-    <main>
-        <section>
-            <h2>Sistema en construcción</h2>
-            <p>El entorno inicial de Django y PostgreSQL fue configurado correctamente.</p>
+    <main id="contenido">
+        <section id="inicio" class="relative isolate overflow-hidden bg-white">
+            <div class="absolute inset-x-0 top-0 -z-10 h-96 bg-gradient-to-b from-brand-100/70 to-transparent"></div>
+            <div class="absolute -right-32 top-24 -z-10 size-96 rounded-full bg-brand-200/50 blur-3xl"></div>
+            <div class="absolute -left-32 bottom-0 -z-10 size-80 rounded-full bg-emerald-100/70 blur-3xl"></div>
+
+            <div class="mx-auto grid max-w-7xl items-center gap-16 px-6 py-20 lg:grid-cols-[1.08fr_0.92fr] lg:px-8 lg:py-28">
+                <div>
+                    <span class="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-4 py-2 text-sm font-bold text-brand-800">
+                        <span class="size-2 rounded-full bg-brand-500"></span>
+                        Proyecto ABP · Aplicación web interna
+                    </span>
+
+                    <h1 class="mt-7 max-w-3xl text-4xl font-black tracking-tight text-slate-950 sm:text-5xl lg:text-6xl lg:leading-[1.08]">
+                        Planilla de Novedades de Remuneraciones
+                    </h1>
+
+                    <p class="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
+                        Una solución web para transformar el registro manual en Excel
+                        en un proceso estructurado de captura, validación y exportación
+                        de novedades mensuales.
+                    </p>
+
+                    <div class="mt-9 flex flex-col gap-3 sm:flex-row">
+                        <a
+                            href="#proyecto"
+                            class="inline-flex items-center justify-center rounded-xl bg-brand-700 px-6 py-3.5 font-bold text-white shadow-xl shadow-brand-900/20 transition hover:-translate-y-0.5 hover:bg-brand-800"
+                        >
+                            Conocer el proyecto
+                        </a>
+
+                        <a
+                            href="{% url 'api:api-root' %}"
+                            class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3.5 font-bold text-slate-800 transition hover:border-brand-400 hover:text-brand-800"
+                        >
+                            Explorar API REST
+                        </a>
+                    </div>
+
+                    <ul class="mt-8 grid gap-3 text-sm font-semibold text-slate-600 sm:grid-cols-2">
+                        <li class="flex items-center gap-2">
+                            <span class="grid size-6 place-items-center rounded-full bg-brand-100 text-brand-700">✓</span>
+                            Uso interno y controlado
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="grid size-6 place-items-center rounded-full bg-brand-100 text-brand-700">✓</span>
+                            Información centralizada
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="grid size-6 place-items-center rounded-full bg-brand-100 text-brand-700">✓</span>
+                            Validaciones de integridad
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="grid size-6 place-items-center rounded-full bg-brand-100 text-brand-700">✓</span>
+                            Trazabilidad por usuario
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="relative mx-auto w-full max-w-xl">
+                    <div class="absolute -inset-5 -z-10 rounded-[2.5rem] bg-gradient-to-br from-brand-300/40 to-emerald-100 blur-2xl"></div>
+
+                    <div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-2xl shadow-slate-900/10 sm:p-8">
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <p class="text-sm font-bold uppercase tracking-[0.18em] text-brand-700">
+                                    Flujo mensual
+                                </p>
+                                <h2 class="mt-2 text-2xl font-black text-slate-950">
+                                    De la novedad al reporte
+                                </h2>
+                            </div>
+
+                            <span class="rounded-full bg-amber-100 px-3 py-1.5 text-xs font-bold text-amber-800">
+                                En desarrollo
+                            </span>
+                        </div>
+
+                        <div class="mt-8 space-y-4">
+                            <article class="flex gap-4 rounded-2xl border border-brand-100 bg-brand-50/70 p-4">
+                                <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-brand-700 font-black text-white">1</span>
+                                <div>
+                                    <h3 class="font-bold text-slate-950">Capturar</h3>
+                                    <p class="mt-1 text-sm leading-6 text-slate-600">
+                                        Registrar horas extras, bonos, ausencias, licencias y otras novedades.
+                                    </p>
+                                </div>
+                            </article>
+
+                            <article class="flex gap-4 rounded-2xl border border-slate-200 bg-white p-4">
+                                <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-slate-900 font-black text-white">2</span>
+                                <div>
+                                    <h3 class="font-bold text-slate-950">Validar</h3>
+                                    <p class="mt-1 text-sm leading-6 text-slate-600">
+                                        Comprobar campos obligatorios, fechas, cantidades y estados.
+                                    </p>
+                                </div>
+                            </article>
+
+                            <article class="flex gap-4 rounded-2xl border border-slate-200 bg-white p-4">
+                                <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-slate-900 font-black text-white">3</span>
+                                <div>
+                                    <h3 class="font-bold text-slate-950">Exportar</h3>
+                                    <p class="mt-1 text-sm leading-6 text-slate-600">
+                                        Preparar información organizada para el proceso contable.
+                                    </p>
+                                </div>
+                            </article>
+                        </div>
+
+                        <div class="mt-6 grid grid-cols-3 gap-3 rounded-2xl bg-slate-950 p-5 text-center text-white">
+                            <div>
+                                <strong class="block text-2xl font-black text-brand-300">10</strong>
+                                <span class="text-xs text-slate-300">modelos</span>
+                            </div>
+                            <div class="border-x border-slate-700">
+                                <strong class="block text-2xl font-black text-brand-300">10</strong>
+                                <span class="text-xs text-slate-300">recursos API</span>
+                            </div>
+                            <div>
+                                <strong class="block text-2xl font-black text-brand-300">13</strong>
+                                <span class="text-xs text-slate-300">pruebas</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="proyecto" class="border-y border-slate-200 bg-slate-50 py-20 lg:py-24">
+            <div class="mx-auto max-w-7xl px-6 lg:px-8">
+                <div class="max-w-3xl">
+                    <p class="text-sm font-black uppercase tracking-[0.2em] text-brand-700">El problema</p>
+                    <h2 class="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
+                        Un proceso manual expuesto a errores y reprocesos
+                    </h2>
+                    <p class="mt-5 text-lg leading-8 text-slate-600">
+                        Actualmente las novedades se consolidan mediante una planilla Excel.
+                        La manipulación repetitiva de celdas dificulta la validación, el seguimiento
+                        de cambios y la preparación uniforme de la información para contabilidad.
+                    </p>
+                </div>
+
+                <div class="mt-12 grid gap-6 md:grid-cols-3">
+                    <article class="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
+                        <span class="text-sm font-black text-brand-700">01</span>
+                        <h3 class="mt-4 text-xl font-black text-slate-950">Registro disperso</h3>
+                        <p class="mt-3 leading-7 text-slate-600">
+                            La información se distribuye entre hojas, filas y columnas que deben revisarse manualmente.
+                        </p>
+                    </article>
+
+                    <article class="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
+                        <span class="text-sm font-black text-brand-700">02</span>
+                        <h3 class="mt-4 text-xl font-black text-slate-950">Validación limitada</h3>
+                        <p class="mt-3 leading-7 text-slate-600">
+                            Un dato incompleto o escrito en un formato incorrecto puede afectar el consolidado mensual.
+                        </p>
+                    </article>
+
+                    <article class="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
+                        <span class="text-sm font-black text-brand-700">03</span>
+                        <h3 class="mt-4 text-xl font-black text-slate-950">Poca trazabilidad</h3>
+                        <p class="mt-3 leading-7 text-slate-600">
+                            Resulta difícil identificar quién registró, modificó o validó cada novedad.
+                        </p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="solucion" class="bg-white py-20 lg:py-24">
+            <div class="mx-auto max-w-7xl px-6 lg:px-8">
+                <div class="mx-auto max-w-3xl text-center">
+                    <p class="text-sm font-black uppercase tracking-[0.2em] text-brand-700">La solución propuesta</p>
+                    <h2 class="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
+                        Una aplicación diseñada alrededor del proceso real
+                    </h2>
+                    <p class="mt-5 text-lg leading-8 text-slate-600">
+                        El sistema centraliza colaboradores, contratos, períodos y novedades,
+                        aplicando reglas de negocio antes de preparar los datos para contabilidad.
+                    </p>
+                </div>
+
+                <div class="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    <article class="rounded-2xl border border-slate-200 p-7 transition hover:-translate-y-1 hover:border-brand-300 hover:shadow-xl">
+                        <h3 class="text-lg font-black text-slate-950">Colaboradores</h3>
+                        <p class="mt-3 leading-7 text-slate-600">
+                            Administración estructurada de datos laborales, bancarios y previsionales.
+                        </p>
+                    </article>
+
+                    <article class="rounded-2xl border border-slate-200 p-7 transition hover:-translate-y-1 hover:border-brand-300 hover:shadow-xl">
+                        <h3 class="text-lg font-black text-slate-950">Períodos mensuales</h3>
+                        <p class="mt-3 leading-7 text-slate-600">
+                            Separación de la información por sucursal, año, mes y estado del proceso.
+                        </p>
+                    </article>
+
+                    <article class="rounded-2xl border border-slate-200 p-7 transition hover:-translate-y-1 hover:border-brand-300 hover:shadow-xl">
+                        <h3 class="text-lg font-black text-slate-950">Novedades</h3>
+                        <p class="mt-3 leading-7 text-slate-600">
+                            Registro de horas extras, inasistencias, licencias, bonos, descuentos y anticipos.
+                        </p>
+                    </article>
+
+                    <article class="rounded-2xl border border-slate-200 p-7 transition hover:-translate-y-1 hover:border-brand-300 hover:shadow-xl">
+                        <h3 class="text-lg font-black text-slate-950">Validaciones</h3>
+                        <p class="mt-3 leading-7 text-slate-600">
+                            Reglas para fechas, montos, cantidades, estados y campos obligatorios.
+                        </p>
+                    </article>
+
+                    <article class="rounded-2xl border border-slate-200 p-7 transition hover:-translate-y-1 hover:border-brand-300 hover:shadow-xl">
+                        <h3 class="text-lg font-black text-slate-950">Trazabilidad</h3>
+                        <p class="mt-3 leading-7 text-slate-600">
+                            Identificación del usuario que registra, valida o genera una exportación.
+                        </p>
+                    </article>
+
+                    <article class="rounded-2xl border border-slate-200 p-7 transition hover:-translate-y-1 hover:border-brand-300 hover:shadow-xl">
+                        <h3 class="text-lg font-black text-slate-950">Exportaciones</h3>
+                        <p class="mt-3 leading-7 text-slate-600">
+                            Preparación de archivos CSV o Excel para entregar información organizada.
+                        </p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="flujo" class="bg-brand-950 py-20 text-white lg:py-24">
+            <div class="mx-auto max-w-7xl px-6 lg:px-8">
+                <div class="max-w-3xl">
+                    <p class="text-sm font-black uppercase tracking-[0.2em] text-brand-300">Proceso propuesto</p>
+                    <h2 class="mt-3 text-3xl font-black tracking-tight sm:text-4xl">
+                        Tres etapas para controlar cada período
+                    </h2>
+                </div>
+
+                <div class="mt-14 grid gap-6 lg:grid-cols-3">
+                    <article class="rounded-2xl border border-white/10 bg-white/5 p-7">
+                        <span class="text-sm font-black text-brand-300">ETAPA 1</span>
+                        <h3 class="mt-4 text-2xl font-black">Captura</h3>
+                        <p class="mt-3 leading-7 text-slate-300">
+                            El usuario selecciona el período y registra las novedades correspondientes a cada colaborador.
+                        </p>
+                    </article>
+
+                    <article class="rounded-2xl border border-white/10 bg-white/5 p-7">
+                        <span class="text-sm font-black text-brand-300">ETAPA 2</span>
+                        <h3 class="mt-4 text-2xl font-black">Validación</h3>
+                        <p class="mt-3 leading-7 text-slate-300">
+                            El sistema comprueba reglas de integridad y un usuario autorizado revisa la información.
+                        </p>
+                    </article>
+
+                    <article class="rounded-2xl border border-brand-400/40 bg-brand-500/10 p-7">
+                        <span class="text-sm font-black text-brand-300">ETAPA 3</span>
+                        <h3 class="mt-4 text-2xl font-black">Exportación</h3>
+                        <p class="mt-3 leading-7 text-slate-300">
+                            Las novedades validadas se consolidan en un archivo destinado al proceso contable.
+                        </p>
+                    </article>
+                </div>
+
+                <div class="mt-8 rounded-2xl border border-amber-300/30 bg-amber-300/10 p-5 text-sm leading-6 text-amber-100">
+                    <strong>Alcance:</strong> la aplicación organiza las novedades y facilita su entrega.
+                    No reemplaza el cálculo legal ni el motor de liquidación de remuneraciones de Nubox.
+                </div>
+            </div>
+        </section>
+
+        <section id="tecnologia" class="bg-slate-50 py-20 lg:py-24">
+            <div class="mx-auto max-w-7xl px-6 lg:px-8">
+                <div class="mx-auto max-w-3xl text-center">
+                    <p class="text-sm font-black uppercase tracking-[0.2em] text-brand-700">Arquitectura tecnológica</p>
+                    <h2 class="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
+                        Tecnologías abiertas y adecuadas para el proyecto
+                    </h2>
+                </div>
+
+                <div class="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                    <article class="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+                        <strong class="block text-xl font-black text-slate-950">Django REST</strong>
+                        <span class="mt-2 block text-sm text-slate-600">Backend y API REST</span>
+                    </article>
+
+                    <article class="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+                        <strong class="block text-xl font-black text-slate-950">PostgreSQL</strong>
+                        <span class="mt-2 block text-sm text-slate-600">Persistencia relacional</span>
+                    </article>
+
+                    <article class="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+                        <strong class="block text-xl font-black text-slate-950">Tailwind CSS</strong>
+                        <span class="mt-2 block text-sm text-slate-600">Interfaz adaptable</span>
+                    </article>
+
+                    <article class="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+                        <strong class="block text-xl font-black text-slate-950">JavaScript</strong>
+                        <span class="mt-2 block text-sm text-slate-600">Interacciones del frontend</span>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="seguridad" class="bg-white py-20 lg:py-24">
+            <div class="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-2 lg:px-8">
+                <div>
+                    <p class="text-sm font-black uppercase tracking-[0.2em] text-brand-700">Privacidad y seguridad</p>
+                    <h2 class="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
+                        La información laboral requiere controles desde el diseño
+                    </h2>
+                    <p class="mt-5 text-lg leading-8 text-slate-600">
+                        El sistema está planteado para uso interno y restringe sus recursos
+                        a usuarios autenticados. Las credenciales y los datos reales nunca
+                        se almacenan en el repositorio público.
+                    </p>
+                </div>
+
+                <div class="grid gap-4">
+                    <div class="rounded-2xl border border-brand-100 bg-brand-50 p-5">
+                        <h3 class="font-black text-brand-950">Autenticación obligatoria</h3>
+                        <p class="mt-2 text-sm leading-6 text-brand-900/80">
+                            Los endpoints de la API requieren una sesión válida.
+                        </p>
+                    </div>
+
+                    <div class="rounded-2xl border border-brand-100 bg-brand-50 p-5">
+                        <h3 class="font-black text-brand-950">Integridad de los datos</h3>
+                        <p class="mt-2 text-sm leading-6 text-brand-900/80">
+                            PostgreSQL y Django aplican relaciones, restricciones y validadores.
+                        </p>
+                    </div>
+
+                    <div class="rounded-2xl border border-brand-100 bg-brand-50 p-5">
+                        <h3 class="font-black text-brand-950">Datos ficticios en demostraciones</h3>
+                        <p class="mt-2 text-sm leading-6 text-brand-900/80">
+                            Las pruebas y evidencias públicas no contienen información real de colaboradores.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-brand-700 py-16 text-white">
+            <div class="mx-auto flex max-w-7xl flex-col items-start justify-between gap-8 px-6 lg:flex-row lg:items-center lg:px-8">
+                <div>
+                    <p class="text-sm font-black uppercase tracking-[0.2em] text-brand-200">Estado del proyecto</p>
+                    <h2 class="mt-3 text-3xl font-black">
+                        Backend preparado. Interfaz web en construcción.
+                    </h2>
+                    <p class="mt-3 max-w-2xl leading-7 text-brand-100">
+                        Fecha límite actualizada: 2 de septiembre de 2026.
+                    </p>
+                </div>
+
+                <a
+                    href="{% url 'admin:index' %}"
+                    class="inline-flex shrink-0 items-center justify-center rounded-xl bg-white px-6 py-3.5 font-black text-brand-800 shadow-xl transition hover:-translate-y-0.5"
+                >
+                    Ingresar al sistema
+                </a>
+            </div>
         </section>
     </main>
+
+    <footer class="bg-slate-950 py-10 text-slate-300">
+        <div class="mx-auto flex max-w-7xl flex-col gap-5 px-6 sm:flex-row sm:items-center sm:justify-between lg:px-8">
+            <div>
+                <p class="font-bold text-white">Planilla de Novedades de Remuneraciones</p>
+                <p class="mt-1 text-sm">Proyecto académico ABP · 2026</p>
+            </div>
+
+            <a
+                href="https://github.com/fernandoandresgc1109-web/planilla-novedades-remuneraciones"
+                target="_blank"
+                rel="noreferrer"
+                class="text-sm font-semibold transition hover:text-brand-300"
+            >
+                Ver repositorio en GitHub
+            </a>
+        </div>
+    </footer>
 </body>
 </html>
