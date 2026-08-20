@@ -1,0 +1,32 @@
+{
+  "name": "planilla-novedades-remuneraciones",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Frontend de la aplicación web para la gestión de novedades de remuneraciones en Alimentos Rancagua SpA.",
+  "scripts": {
+    "css:build": "tailwindcss -i ./static/novedades/css/input.css -o ./static/novedades/css/landing.css --minify",
+    "css:watch": "tailwindcss -i ./static/novedades/css/input.css -o ./static/novedades/css/landing.css --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fernandoandresgc1109-web/planilla-novedades-remuneraciones.git"
+  },
+  "keywords": [
+    "django",
+    "tailwindcss",
+    "remuneraciones"
+  ],
+  "author": "Fernando Andrés Gómez Cano",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fernandoandresgc1109-web/planilla-novedades-remuneraciones/issues"
+  },
+  "homepage": "https://github.com/fernandoandresgc1109-web/planilla-novedades-remuneraciones#readme",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  },
+  "allowScripts": {
+    "@parcel/watcher@2.5.1": true
+  }
+}
