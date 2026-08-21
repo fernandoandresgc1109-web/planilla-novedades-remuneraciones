@@ -4,7 +4,7 @@
 
 ## Estado del proyecto
 
-Fase actual: landing page implementada y preparación de los formularios internos para la captura de novedades.
+Fase actual: acceso interno y panel principal implementados; preparación del módulo de captura de novedades.
 
 *Fecha de inicio:* 10 de agosto de 2026.  
 *Fecha límite:* 2 de septiembre de 2026.
@@ -158,6 +158,7 @@ Cada jornada de trabajo finalizará con:
 - [Diccionario de datos](docs/diccionario-datos.md): define los campos, tipos, restricciones y reglas de negocio de la base de datos.
 - [API REST](docs/api-rest.md): documenta las rutas, autenticación, permisos, paginación, operaciones y pruebas automatizadas de la API.
 - [Landing page](docs/landing-page.md): explica el propósito, estructura, tecnologías, diseño adaptable, accesibilidad y validaciones de la página de presentación.
+- [Acceso interno y panel principal](docs/acceso-interno.md): describe la autenticación, protección de rutas, funcionamiento del panel, diseño adaptable, medidas de seguridad y pruebas automatizadas.
 
 Los archivos reales utilizados para analizar el proceso no se incluyen en el repositorio porque contienen información personal, bancaria, previsional y salarial.
 
@@ -173,7 +174,7 @@ Los archivos reales utilizados para analizar el proceso no se incluyen en el rep
 - [x] Diseño del modelo entidad-relación.
 - [x] Desarrollo de los modelos.
 - [x] Desarrollo de la API REST.
-- [ ] Desarrollo de la interfaz web (landing completada; módulos internos pendientes).
+- [ ] Desarrollo de la interfaz web (landing, login y panel principal completados; formularios de gestión pendientes).
 - [ ] Implementación de las validaciones.
 - [ ] Implementación de las exportaciones.
 - [ ] Pruebas funcionales y de seguridad.
@@ -191,6 +192,7 @@ Los archivos reales utilizados para analizar el proceso no se incluyen en el rep
 | 15-08-2026 | Desarrollo de los modelos de dominio | Se implementaron los 10 modelos del sistema con sus relaciones, opciones controladas, validadores y restricciones de integridad; se generó y aplicó la migración inicial en PostgreSQL; se registraron los modelos en el panel administrativo y se ejecutaron correctamente 8 pruebas automáticas. |
 | 18-08-2026 | Desarrollo de la API REST | Se implementaron serializadores y endpoints CRUD para los 10 modelos del dominio; se configuraron autenticación por sesión, permisos para usuarios autenticados, paginación de 25 registros y trazabilidad automática de novedades y exportaciones. Se documentó la API y se ejecutaron correctamente 13 pruebas automáticas. |
 | 20-08-2026 | Desarrollo de la landing page | Se implementó la página de presentación del proyecto con Django Templates, HTML5, Tailwind CSS 4 y JavaScript Vanilla; se explicaron el problema, la solución, el flujo mensual, la arquitectura y las medidas de seguridad; se agregó navegación adaptable, menú móvil y accesos internos; se actualizó la fecha límite al 2 de septiembre de 2026; se documentó la implementación y se ejecutaron correctamente 17 pruebas automáticas. |
+| 21-08-2026 | Implementación del acceso y panel interno | Se integró la autenticación por sesión de Django; se creó un login personalizado y adaptable; se protegió el panel principal para usuarios autenticados; se incorporaron indicadores consultados desde PostgreSQL; se implementaron navegación interna, cierre seguro de sesión y redirección mediante `next`; se documentó el funcionamiento y se ejecutaron correctamente 25 pruebas automáticas. |
 
 ## Consideraciones de privacidad
 

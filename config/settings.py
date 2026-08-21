@@ -145,3 +145,9 @@ REST_FRAMEWORK = {
     ),
     "PAGE_SIZE": 25,
 }
+
+# Authentication redirects
+
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "novedades:panel"
+LOGOUT_REDIRECT_URL = "novedades:inicio"
