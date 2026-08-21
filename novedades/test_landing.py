@@ -44,7 +44,7 @@ class LandingPageTests(SimpleTestCase):
         )
         self.assertContains(
             respuesta,
-            f'href="{reverse("admin:index")}"',
+            f'href="{reverse("novedades:panel")}"',
         )
 
     def test_landing_carga_recursos_y_menu_movil(self):

@@ -1,0 +1,350 @@
+{% extends "novedades/base_interno.html" %}
+
+{% block title %}Panel principal{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <section
+        class="overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-700 px-6 py-8 text-white shadow-xl shadow-emerald-950/10 sm:px-8 lg:px-10"
+    >
+        <div
+            class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between"
+        >
+            <div class="max-w-3xl">
+                <p
+                    class="text-sm font-bold uppercase tracking-[0.22em] text-emerald-300"
+                >
+                    Panel principal
+                </p>
+
+                <h1
+                    class="mt-3 text-3xl font-black tracking-tight sm:text-4xl"
+                >
+                    Bienvenido,
+                    {% firstof request.user.first_name request.user.username %}
+                </h1>
+
+                <p class="mt-4 max-w-2xl leading-7 text-emerald-50/80">
+                    Desde este espacio podrás controlar los colaboradores,
+                    períodos y novedades mensuales del proceso de
+                    remuneraciones.
+                </p>
+            </div>
+
+            <div
+                class="w-fit rounded-2xl border border-white/10 bg-white/10 px-5 py-4 backdrop-blur"
+            >
+                <p class="text-xs font-bold uppercase tracking-[0.18em] text-emerald-200">
+                    Fecha actual
+                </p>
+
+                <p class="mt-1 font-bold text-white">
+                    {% now "d/m/Y" %}
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section aria-labelledby="resumen-titulo">
+        <div
+            class="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between"
+        >
+            <div>
+                <p
+                    class="text-xs font-bold uppercase tracking-[0.18em] text-emerald-700"
+                >
+                    Información en tiempo real
+                </p>
+
+                <h2
+                    id="resumen-titulo"
+                    class="mt-2 text-2xl font-black tracking-tight text-slate-950"
+                >
+                    Resumen general
+                </h2>
+            </div>
+
+            <p class="text-sm text-slate-500">
+                Datos consultados desde PostgreSQL
+            </p>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <article
+                class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+            >
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <p class="text-sm font-semibold text-slate-500">
+                            Colaboradores activos
+                        </p>
+
+                        <p
+                            class="mt-3 text-4xl font-black tracking-tight text-slate-950"
+                        >
+                            {{ colaboradores_activos }}
+                        </p>
+                    </div>
+
+                    <span
+                        aria-hidden="true"
+                        class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-xl font-black text-emerald-700"
+                    >
+                        C
+                    </span>
+                </div>
+
+                <p class="mt-5 text-sm leading-6 text-slate-500">
+                    Personas habilitadas actualmente en el sistema.
+                </p>
+            </article>
+
+            <article
+                class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+            >
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <p class="text-sm font-semibold text-slate-500">
+                            Períodos abiertos
+                        </p>
+
+                        <p
+                            class="mt-3 text-4xl font-black tracking-tight text-slate-950"
+                        >
+                            {{ periodos_abiertos }}
+                        </p>
+                    </div>
+
+                    <span
+                        aria-hidden="true"
+                        class="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-xl font-black text-blue-700"
+                    >
+                        P
+                    </span>
+                </div>
+
+                <p class="mt-5 text-sm leading-6 text-slate-500">
+                    Meses disponibles para registrar novedades.
+                </p>
+            </article>
+
+            <article
+                class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+            >
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <p class="text-sm font-semibold text-slate-500">
+                            Novedades en borrador
+                        </p>
+
+                        <p
+                            class="mt-3 text-4xl font-black tracking-tight text-slate-950"
+                        >
+                            {{ novedades_borrador }}
+                        </p>
+                    </div>
+
+                    <span
+                        aria-hidden="true"
+                        class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-xl font-black text-amber-700"
+                    >
+                        B
+                    </span>
+                </div>
+
+                <p class="mt-5 text-sm leading-6 text-slate-500">
+                    Registros pendientes de revisión y validación.
+                </p>
+            </article>
+
+            <article
+                class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+            >
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <p class="text-sm font-semibold text-slate-500">
+                            Novedades validadas
+                        </p>
+
+                        <p
+                            class="mt-3 text-4xl font-black tracking-tight text-slate-950"
+                        >
+                            {{ novedades_validadas }}
+                        </p>
+                    </div>
+
+                    <span
+                        aria-hidden="true"
+                        class="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-100 text-xl font-black text-violet-700"
+                    >
+                        V
+                    </span>
+                </div>
+
+                <p class="mt-5 text-sm leading-6 text-slate-500">
+                    Registros revisados que mantienen trazabilidad.
+                </p>
+            </article>
+        </div>
+    </section>
+
+    <div class="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
+        <section
+            aria-labelledby="flujo-titulo"
+            class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
+        >
+            <p
+                class="text-xs font-bold uppercase tracking-[0.18em] text-emerald-700"
+            >
+                Proceso mensual
+            </p>
+
+            <h2
+                id="flujo-titulo"
+                class="mt-2 text-2xl font-black tracking-tight text-slate-950"
+            >
+                Flujo de trabajo
+            </h2>
+
+            <div class="mt-7 grid gap-4 md:grid-cols-3">
+                <article
+                    class="rounded-2xl border border-emerald-200 bg-emerald-50 p-5"
+                >
+                    <span
+                        class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-700 font-black text-white"
+                    >
+                        1
+                    </span>
+
+                    <h3 class="mt-5 font-black text-slate-950">
+                        Capturar
+                    </h3>
+
+                    <p class="mt-2 text-sm leading-6 text-slate-600">
+                        Registrar las novedades de cada colaborador para el
+                        período correspondiente.
+                    </p>
+                </article>
+
+                <article
+                    class="rounded-2xl border border-slate-200 bg-slate-50 p-5"
+                >
+                    <span
+                        class="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 font-black text-white"
+                    >
+                        2
+                    </span>
+
+                    <h3 class="mt-5 font-black text-slate-950">
+                        Validar
+                    </h3>
+
+                    <p class="mt-2 text-sm leading-6 text-slate-600">
+                        Comprobar fechas, cantidades, montos y campos
+                        obligatorios.
+                    </p>
+                </article>
+
+                <article
+                    class="rounded-2xl border border-slate-200 bg-slate-50 p-5"
+                >
+                    <span
+                        class="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 font-black text-white"
+                    >
+                        3
+                    </span>
+
+                    <h3 class="mt-5 font-black text-slate-950">
+                        Exportar
+                    </h3>
+
+                    <p class="mt-2 text-sm leading-6 text-slate-600">
+                        Preparar la información organizada para el proceso
+                        contable.
+                    </p>
+                </article>
+            </div>
+        </section>
+
+        <section
+            aria-labelledby="accesos-titulo"
+            class="rounded-3xl bg-slate-950 p-6 text-white shadow-xl shadow-slate-950/10 sm:p-8"
+        >
+            <p
+                class="text-xs font-bold uppercase tracking-[0.18em] text-emerald-300"
+            >
+                Herramientas
+            </p>
+
+            <h2
+                id="accesos-titulo"
+                class="mt-2 text-2xl font-black"
+            >
+                Accesos disponibles
+            </h2>
+
+            <div class="mt-6 space-y-3">
+                <a
+                    href="{% url 'api:api-root' %}"
+                    class="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-4 font-bold transition hover:border-emerald-400/40 hover:bg-emerald-400/10 focus:outline-none focus:ring-4 focus:ring-emerald-400/20"
+                >
+                    Explorar API REST
+                    <span aria-hidden="true">→</span>
+                </a>
+
+                {% if request.user.is_staff %}
+                    <a
+                        href="{% url 'admin:index' %}"
+                        class="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-4 font-bold transition hover:border-emerald-400/40 hover:bg-emerald-400/10 focus:outline-none focus:ring-4 focus:ring-emerald-400/20"
+                    >
+                        Administración
+                        <span aria-hidden="true">→</span>
+                    </a>
+                {% endif %}
+
+                <a
+                    href="{% url 'novedades:inicio' %}"
+                    class="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-4 font-bold transition hover:border-emerald-400/40 hover:bg-emerald-400/10 focus:outline-none focus:ring-4 focus:ring-emerald-400/20"
+                >
+                    Ver landing
+                    <span aria-hidden="true">→</span>
+                </a>
+            </div>
+
+            <div
+                class="mt-6 rounded-2xl border border-amber-300/20 bg-amber-300/10 p-4"
+            >
+                <p class="text-sm font-bold text-amber-200">
+                    Próximo desarrollo
+                </p>
+
+                <p class="mt-2 text-sm leading-6 text-slate-300">
+                    Formularios internos para colaboradores, períodos y
+                    novedades.
+                </p>
+            </div>
+        </section>
+    </div>
+
+    <section
+        class="flex flex-col gap-4 rounded-3xl border border-emerald-200 bg-emerald-50 p-6 sm:flex-row sm:items-center sm:justify-between"
+    >
+        <div>
+            <h2 class="font-black text-emerald-950">
+                Sesión protegida
+            </h2>
+
+            <p class="mt-1 text-sm leading-6 text-emerald-900/70">
+                El acceso al panel requiere autenticación y las acciones
+                quedan asociadas al usuario que las realiza.
+            </p>
+        </div>
+
+        <span
+            class="w-fit shrink-0 rounded-full bg-emerald-700 px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] text-white"
+        >
+            Usuario autorizado
+        </span>
+    </section>
+</div>
+{% endblock %}

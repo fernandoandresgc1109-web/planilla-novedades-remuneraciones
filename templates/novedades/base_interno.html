@@ -1,0 +1,274 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="description"
+        content="Panel interno del sistema de novedades de remuneraciones."
+    >
+
+    <title>
+        {% block title %}Panel interno{% endblock %}
+        | Novedades de Remuneraciones
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'novedades/css/landing.css' %}"
+    >
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="min-h-full bg-slate-100 text-slate-900 antialiased">
+    <a
+        href="#contenido"
+        class="sr-only fixed left-4 top-4 z-[100] rounded-lg bg-white px-4 py-3 font-semibold text-slate-950 shadow-lg focus:not-sr-only"
+    >
+        Saltar al contenido
+    </a>
+
+    <div class="min-h-screen lg:grid lg:grid-cols-[17rem_1fr]">
+        <aside
+            class="hidden min-h-screen flex-col bg-slate-950 text-white lg:flex"
+        >
+            <div class="border-b border-white/10 px-6 py-6">
+                <a
+                    href="{% url 'novedades:panel' %}"
+                    class="flex items-center gap-3 rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-400/30"
+                >
+                    <span
+                        class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-700 font-black text-white shadow-lg shadow-black/20"
+                    >
+                        NR
+                    </span>
+
+                    <span>
+                        <strong class="block text-sm">
+                            Novedades de
+                            <br>
+                            Remuneraciones
+                        </strong>
+
+                        <span class="mt-1 block text-xs text-slate-400">
+                            Área interna
+                        </span>
+                    </span>
+                </a>
+            </div>
+
+            <nav
+                aria-label="Navegación principal"
+                class="flex-1 space-y-2 px-4 py-6"
+            >
+                <a
+                    href="{% url 'novedades:panel' %}"
+                    aria-current="page"
+                    class="flex items-center gap-3 rounded-xl bg-emerald-700 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-950/20"
+                >
+                    <span
+                        aria-hidden="true"
+                        class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10"
+                    >
+                        ▦
+                    </span>
+                    Panel principal
+                </a>
+
+                <a
+                    href="{% url 'api:api-root' %}"
+                    class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-white/5 hover:text-white focus:outline-none focus:ring-4 focus:ring-emerald-400/20"
+                >
+                    <span
+                        aria-hidden="true"
+                        class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5"
+                    >
+                        API
+                    </span>
+                    API REST
+                </a>
+
+                {% if request.user.is_staff %}
+                    <a
+                        href="{% url 'admin:index' %}"
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-white/5 hover:text-white focus:outline-none focus:ring-4 focus:ring-emerald-400/20"
+                    >
+                        <span
+                            aria-hidden="true"
+                            class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5"
+                        >
+                            ⚙
+                        </span>
+                        Administración
+                    </a>
+                {% endif %}
+
+                <a
+                    href="{% url 'novedades:inicio' %}"
+                    class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-white/5 hover:text-white focus:outline-none focus:ring-4 focus:ring-emerald-400/20"
+                >
+                    <span
+                        aria-hidden="true"
+                        class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5"
+                    >
+                        ↗
+                    </span>
+                    Ver landing
+                </a>
+            </nav>
+
+            <div class="border-t border-white/10 p-4">
+                <div class="rounded-2xl bg-white/5 p-4">
+                    <div class="flex items-center gap-3">
+                        <span
+                            class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-600 font-bold text-white"
+                        >
+                            {{ request.user.username|first|upper }}
+                        </span>
+
+                        <div class="min-w-0 flex-1">
+                            <p class="truncate text-sm font-bold text-white">
+                                {% firstof request.user.get_full_name request.user.username %}
+                            </p>
+
+                            <p class="truncate text-xs text-slate-400">
+                                Usuario autenticado
+                            </p>
+                        </div>
+                    </div>
+
+                    <form
+                        method="post"
+                        action="{% url 'logout' %}"
+                        class="mt-4"
+                    >
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="w-full rounded-xl border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-200 transition hover:border-red-400/40 hover:bg-red-500/10 hover:text-red-200 focus:outline-none focus:ring-4 focus:ring-red-400/20"
+                        >
+                            Cerrar sesión
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </aside>
+
+        <div class="min-w-0">
+            <header
+                class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur"
+            >
+                <div
+                    class="flex min-h-20 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8"
+                >
+                    <div class="flex min-w-0 items-center gap-3">
+                        <a
+                            href="{% url 'novedades:panel' %}"
+                            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-700 font-black text-white lg:hidden"
+                        >
+                            NR
+                        </a>
+
+                        <div class="min-w-0">
+                            <p class="text-xs font-bold uppercase tracking-[0.18em] text-emerald-700">
+                                Sistema interno
+                            </p>
+
+                            <p class="truncate font-bold text-slate-950">
+                                Alimentos Rancagua SpA
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <div class="hidden text-right sm:block">
+                            <p class="text-sm font-bold text-slate-900">
+                                {% firstof request.user.get_full_name request.user.username %}
+                            </p>
+
+                            <p class="text-xs text-slate-500">
+                                Sesión activa
+                            </p>
+                        </div>
+
+                        <span
+                            class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 font-bold text-emerald-800"
+                        >
+                            {{ request.user.username|first|upper }}
+                        </span>
+
+                        <form
+                            method="post"
+                            action="{% url 'logout' %}"
+                            class="lg:hidden"
+                        >
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-4 focus:ring-red-100"
+                            >
+                                Salir
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <nav
+                    aria-label="Navegación móvil"
+                    class="flex gap-2 overflow-x-auto border-t border-slate-100 px-4 py-3 lg:hidden"
+                >
+                    <a
+                        href="{% url 'novedades:panel' %}"
+                        class="shrink-0 rounded-full bg-emerald-700 px-4 py-2 text-xs font-bold text-white"
+                    >
+                        Panel
+                    </a>
+
+                    <a
+                        href="{% url 'api:api-root' %}"
+                        class="shrink-0 rounded-full bg-slate-100 px-4 py-2 text-xs font-bold text-slate-700"
+                    >
+                        API REST
+                    </a>
+
+                    {% if request.user.is_staff %}
+                        <a
+                            href="{% url 'admin:index' %}"
+                            class="shrink-0 rounded-full bg-slate-100 px-4 py-2 text-xs font-bold text-slate-700"
+                        >
+                            Administración
+                        </a>
+                    {% endif %}
+
+                    <a
+                        href="{% url 'novedades:inicio' %}"
+                        class="shrink-0 rounded-full bg-slate-100 px-4 py-2 text-xs font-bold text-slate-700"
+                    >
+                        Landing
+                    </a>
+                </nav>
+            </header>
+
+            <main
+                id="contenido"
+                class="mx-auto w-full max-w-[100rem] px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10"
+            >
+                {% block content %}{% endblock %}
+            </main>
+
+            <footer class="border-t border-slate-200 bg-white px-6 py-6">
+                <p class="text-center text-sm text-slate-500">
+                    Sistema interno de gestión de novedades de remuneraciones.
+                </p>
+            </footer>
+        </div>
+    </div>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
