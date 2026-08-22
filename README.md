@@ -4,7 +4,7 @@
 
 ## Estado del proyecto
 
-Fase actual: acceso interno y panel principal implementados; preparación del módulo de captura de novedades.
+Fase actual: módulo de captura y consulta de novedades implementado; preparación de las funciones de edición, validación y anulación.
 
 *Fecha de inicio:* 10 de agosto de 2026.  
 *Fecha límite:* 2 de septiembre de 2026.
@@ -159,6 +159,7 @@ Cada jornada de trabajo finalizará con:
 - [API REST](docs/api-rest.md): documenta las rutas, autenticación, permisos, paginación, operaciones y pruebas automatizadas de la API.
 - [Landing page](docs/landing-page.md): explica el propósito, estructura, tecnologías, diseño adaptable, accesibilidad y validaciones de la página de presentación.
 - [Acceso interno y panel principal](docs/acceso-interno.md): describe la autenticación, protección de rutas, funcionamiento del panel, diseño adaptable, medidas de seguridad y pruebas automatizadas.
+- [Captura y consulta de novedades](docs/captura-novedades.md): explica el formulario, las validaciones, la trazabilidad, la búsqueda, los filtros, la paginación, el diseño adaptable y las pruebas del módulo.
 
 Los archivos reales utilizados para analizar el proceso no se incluyen en el repositorio porque contienen información personal, bancaria, previsional y salarial.
 
@@ -174,8 +175,8 @@ Los archivos reales utilizados para analizar el proceso no se incluyen en el rep
 - [x] Diseño del modelo entidad-relación.
 - [x] Desarrollo de los modelos.
 - [x] Desarrollo de la API REST.
-- [ ] Desarrollo de la interfaz web (landing, login y panel principal completados; formularios de gestión pendientes).
-- [ ] Implementación de las validaciones.
+- [ ] Desarrollo de la interfaz web (landing, login, panel, captura y consulta completados; edición y otros módulos internos pendientes).
+- [ ] Implementación de las validaciones (reglas iniciales de captura completadas; flujo de validación pendiente).
 - [ ] Implementación de las exportaciones.
 - [ ] Pruebas funcionales y de seguridad.
 - [ ] Despliegue en la nube.
@@ -193,6 +194,7 @@ Los archivos reales utilizados para analizar el proceso no se incluyen en el rep
 | 18-08-2026 | Desarrollo de la API REST | Se implementaron serializadores y endpoints CRUD para los 10 modelos del dominio; se configuraron autenticación por sesión, permisos para usuarios autenticados, paginación de 25 registros y trazabilidad automática de novedades y exportaciones. Se documentó la API y se ejecutaron correctamente 13 pruebas automáticas. |
 | 20-08-2026 | Desarrollo de la landing page | Se implementó la página de presentación del proyecto con Django Templates, HTML5, Tailwind CSS 4 y JavaScript Vanilla; se explicaron el problema, la solución, el flujo mensual, la arquitectura y las medidas de seguridad; se agregó navegación adaptable, menú móvil y accesos internos; se actualizó la fecha límite al 2 de septiembre de 2026; se documentó la implementación y se ejecutaron correctamente 17 pruebas automáticas. |
 | 21-08-2026 | Implementación del acceso y panel interno | Se integró la autenticación por sesión de Django; se creó un login personalizado y adaptable; se protegió el panel principal para usuarios autenticados; se incorporaron indicadores consultados desde PostgreSQL; se implementaron navegación interna, cierre seguro de sesión y redirección mediante `next`; se documentó el funcionamiento y se ejecutaron correctamente 25 pruebas automáticas. |
+| 22-08-2026 | Implementación de captura y consulta de novedades | Se desarrollaron el formulario interno, validaciones condicionales, listado, búsqueda, filtros, paginación y trazabilidad automática; se verificó el diseño adaptable y se probaron registros completamente ficticios; se documentó el módulo y se ejecutaron correctamente 31 pruebas automáticas. |
 
 ## Consideraciones de privacidad
 
