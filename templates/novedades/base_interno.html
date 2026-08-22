@@ -60,65 +60,92 @@
                 </a>
             </div>
 
-            <nav
-                aria-label="Navegación principal"
-                class="flex-1 space-y-2 px-4 py-6"
-            >
-                <a
-                    href="{% url 'novedades:panel' %}"
-                    aria-current="page"
-                    class="flex items-center gap-3 rounded-xl bg-emerald-700 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-950/20"
-                >
-                    <span
-                        aria-hidden="true"
-                        class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10"
-                    >
-                        ▦
-                    </span>
-                    Panel principal
-                </a>
 
-                <a
-                    href="{% url 'api:api-root' %}"
-                    class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-white/5 hover:text-white focus:outline-none focus:ring-4 focus:ring-emerald-400/20"
+            {% with url_name=request.resolver_match.url_name %}
+                <nav
+                    aria-label="Navegación principal"
+                    class="flex-1 space-y-2 px-4 py-6"
                 >
-                    <span
-                        aria-hidden="true"
-                        class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5"
-                    >
-                        API
-                    </span>
-                    API REST
-                </a>
-
-                {% if request.user.is_staff %}
                     <a
-                        href="{% url 'admin:index' %}"
+                        href="{% url 'novedades:panel' %}"
+                        {% if url_name == "panel" %}aria-current="page"{% endif %}
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition
+                        {% if url_name == 'panel' %}
+                            bg-emerald-700 font-bold text-white shadow-lg shadow-emerald-950/20
+                        {% else %}
+                            font-semibold text-slate-300 hover:bg-white/5 hover:text-white
+                        {% endif %}"
+                    >
+                        <span
+                            aria-hidden="true"
+                            class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10"
+                        >
+                            ▦
+                        </span>
+                        Panel principal
+                    </a>
+
+                    <a
+                        href="{% url 'novedades:lista_novedades' %}"
+                        {% if url_name == "lista_novedades" or url_name == "crear_novedad" %}aria-current="page"{% endif %}
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition
+                        {% if url_name == 'lista_novedades' or url_name == 'crear_novedad' %}
+                            bg-emerald-700 font-bold text-white shadow-lg shadow-emerald-950/20
+                        {% else %}
+                            font-semibold text-slate-300 hover:bg-white/5 hover:text-white
+                        {% endif %}"
+                    >
+                        <span
+                            aria-hidden="true"
+                            class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10"
+                        >
+                            N
+                        </span>
+                        Novedades
+                    </a>
+
+                    <a
+                        href="{% url 'api:api-root' %}"
                         class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-white/5 hover:text-white focus:outline-none focus:ring-4 focus:ring-emerald-400/20"
                     >
                         <span
                             aria-hidden="true"
                             class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5"
                         >
-                            ⚙
+                            API
                         </span>
-                        Administración
+                        API REST
                     </a>
-                {% endif %}
 
-                <a
-                    href="{% url 'novedades:inicio' %}"
-                    class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-white/5 hover:text-white focus:outline-none focus:ring-4 focus:ring-emerald-400/20"
-                >
-                    <span
-                        aria-hidden="true"
-                        class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5"
+                    {% if request.user.is_staff %}
+                        <a
+                            href="{% url 'admin:index' %}"
+                            class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-white/5 hover:text-white focus:outline-none focus:ring-4 focus:ring-emerald-400/20"
+                        >
+                            <span
+                                aria-hidden="true"
+                                class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5"
+                            >
+                                ⚙
+                            </span>
+                            Administración
+                        </a>
+                    {% endif %}
+
+                    <a
+                        href="{% url 'novedades:inicio' %}"
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-white/5 hover:text-white focus:outline-none focus:ring-4 focus:ring-emerald-400/20"
                     >
-                        ↗
-                    </span>
-                    Ver landing
-                </a>
-            </nav>
+                        <span
+                            aria-hidden="true"
+                            class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5"
+                        >
+                            ↗
+                        </span>
+                        Ver landing
+                    </a>
+                </nav>
+            {% endwith %}
 
             <div class="border-t border-white/10 p-4">
                 <div class="rounded-2xl bg-white/5 p-4">
@@ -218,15 +245,34 @@
                     </div>
                 </div>
 
-                <nav
+                                <nav
                     aria-label="Navegación móvil"
                     class="flex gap-2 overflow-x-auto border-t border-slate-100 px-4 py-3 lg:hidden"
                 >
                     <a
                         href="{% url 'novedades:panel' %}"
-                        class="shrink-0 rounded-full bg-emerald-700 px-4 py-2 text-xs font-bold text-white"
+                        {% if request.resolver_match.url_name == 'panel' %}aria-current="page"{% endif %}
+                        class="shrink-0 rounded-full px-4 py-2 text-xs font-bold
+                        {% if request.resolver_match.url_name == 'panel' %}
+                            bg-emerald-700 text-white
+                        {% else %}
+                            bg-slate-100 text-slate-700
+                        {% endif %}"
                     >
                         Panel
+                    </a>
+
+                    <a
+                        href="{% url 'novedades:lista_novedades' %}"
+                        {% if request.resolver_match.url_name == 'lista_novedades' or request.resolver_match.url_name == 'crear_novedad' %}aria-current="page"{% endif %}
+                        class="shrink-0 rounded-full px-4 py-2 text-xs font-bold
+                        {% if request.resolver_match.url_name == 'lista_novedades' or request.resolver_match.url_name == 'crear_novedad' %}
+                            bg-emerald-700 text-white
+                        {% else %}
+                            bg-slate-100 text-slate-700
+                        {% endif %}"
+                    >
+                        Novedades
                     </a>
 
                     <a
