@@ -32,4 +32,10 @@ urlpatterns = [
         views.anular_novedad,
         name="anular_novedad",
     ),
+
+        path(
+        "exportaciones/",
+        views.exportar_novedades,
+        name="exportar_novedades",
+    ),
 ]

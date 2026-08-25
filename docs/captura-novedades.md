@@ -321,12 +321,12 @@ El módulo ya permite:
 - Anular novedades indicando un motivo.
 - Consultar la trazabilidad de los cambios.
 - Aplicar las mismas reglas desde la interfaz web y la API REST.
+- Exportar novedades validadas en CSV y Excel con auditoría.
 
 Las novedades no se eliminan físicamente. La anulación conserva el registro como evidencia histórica.
 
 Continúan pendientes:
 
-- Exportar la información.
 - Administrar colaboradores desde la interfaz interna personalizada.
 - Administrar períodos desde la interfaz interna personalizada.
 

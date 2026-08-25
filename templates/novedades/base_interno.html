@@ -103,7 +103,24 @@
                         </span>
                         Novedades
                     </a>
-
+                    <a
+                        href="{% url 'novedades:exportar_novedades' %}"
+                        {% if url_name == "exportar_novedades" %}aria-current="page"{% endif %}
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition
+                        {% if url_name == 'exportar_novedades' %}
+                            bg-emerald-700 font-bold text-white shadow-lg shadow-emerald-950/20
+                        {% else %}
+                            font-semibold text-slate-300 hover:bg-white/5 hover:text-white
+                        {% endif %}"
+                    >
+                        <span
+                            aria-hidden="true"
+                            class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10"
+                        >
+                            ⇩
+                        </span>
+                        Exportaciones
+                    </a>
                     <a
                         href="{% url 'api:api-root' %}"
                         class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-white/5 hover:text-white focus:outline-none focus:ring-4 focus:ring-emerald-400/20"
@@ -274,7 +291,18 @@
                     >
                         Novedades
                     </a>
-
+                    <a
+                        href="{% url 'novedades:exportar_novedades' %}"
+                        {% if request.resolver_match.url_name == 'exportar_novedades' %}aria-current="page"{% endif %}
+                        class="shrink-0 rounded-full px-4 py-2 text-xs font-bold
+                        {% if request.resolver_match.url_name == 'exportar_novedades' %}
+                            bg-emerald-700 text-white
+                        {% else %}
+                            bg-slate-100 text-slate-700
+                        {% endif %}"
+                    >
+                        Exportaciones
+                    </a>
                     <a
                         href="{% url 'api:api-root' %}"
                         class="shrink-0 rounded-full bg-slate-100 px-4 py-2 text-xs font-bold text-slate-700"
