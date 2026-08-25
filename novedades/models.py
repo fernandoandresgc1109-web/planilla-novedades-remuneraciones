@@ -1,8 +1,10 @@
 from decimal import Decimal
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils import timezone
 
 
 class Sucursal(models.Model):
@@ -15,6 +17,8 @@ class Sucursal(models.Model):
         ordering = ["nombre"]
         verbose_name = "sucursal"
         verbose_name_plural = "sucursales"
+
+
 
     def __str__(self):
         return f"{self.codigo} - {self.nombre}"
@@ -314,6 +318,22 @@ class Novedad(models.Model):
         null=True,
         blank=True,
     )
+    validado_en = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+    anulado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="novedades_anuladas",
+        null=True,
+        blank=True,
+    )
+    anulado_en = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+    motivo_anulacion = models.TextField(blank=True)
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
 
@@ -345,7 +365,89 @@ class Novedad(models.Model):
                 name="novedad_monto_no_negativo",
             ),
         ]
+    @property
+    def puede_editar(self):
+        return (
+            self.estado == self.Estado.BORRADOR
+            and self.periodo.estado
+            == PeriodoLiquidacion.Estado.ABIERTO
+        )
 
+    @property
+    def puede_validar(self):
+        return self.puede_editar
+
+    @property
+    def puede_anular(self):
+        return self.estado in {
+            self.Estado.BORRADOR,
+            self.Estado.VALIDADA,
+        }
+
+    def validar(self, usuario):
+        if not self.puede_validar:
+            raise ValidationError(
+                (
+                    "Solo se pueden validar novedades en borrador "
+                    "pertenecientes a un período abierto."
+                )
+            )
+
+        self.full_clean()
+
+        self.estado = self.Estado.VALIDADA
+        self.validado_por = usuario
+        self.validado_en = timezone.now()
+        self.save(
+            update_fields=[
+                "estado",
+                "validado_por",
+                "validado_en",
+                "actualizado_en",
+            ]
+        )
+
+        return self
+
+    def anular(self, usuario, motivo):
+        if not self.puede_anular:
+            raise ValidationError(
+                (
+                    "Esta novedad no se encuentra en un estado "
+                    "que permita anularla."
+                )
+            )
+
+        if not isinstance(motivo, str):
+            motivo = ""
+
+        motivo = motivo.strip()
+
+        if not 10 <= len(motivo) <= 500:
+            raise ValidationError(
+                {
+                    "motivo_anulacion": (
+                        "El motivo debe tener entre "
+                        "10 y 500 caracteres."
+                    )
+                }
+            )
+
+        self.estado = self.Estado.ANULADA
+        self.anulado_por = usuario
+        self.anulado_en = timezone.now()
+        self.motivo_anulacion = motivo
+        self.save(
+            update_fields=[
+                "estado",
+                "anulado_por",
+                "anulado_en",
+                "motivo_anulacion",
+                "actualizado_en",
+            ]
+        )
+
+        return self
     def __str__(self):
         return f"{self.tipo_novedad} - {self.colaborador} ({self.periodo})"
 

@@ -1,10 +1,12 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db.models import Q
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
 
-from .forms import NovedadForm
+from .forms import AnularNovedadForm, NovedadForm
 from .models import Colaborador, Novedad, PeriodoLiquidacion
 
 
@@ -118,5 +120,136 @@ def crear_novedad(request):
     return render(
         request,
         "novedades/crear_novedad.html",
+        contexto,
+    )
+
+@login_required
+def editar_novedad(request, pk):
+    novedad = get_object_or_404(
+        Novedad.objects.select_related(
+            "periodo",
+            "periodo__sucursal",
+            "colaborador",
+            "tipo_novedad",
+        ),
+        pk=pk,
+    )
+
+    if not novedad.puede_editar:
+        messages.error(
+            request,
+            (
+                "Solo se pueden editar novedades en borrador "
+                "pertenecientes a un período abierto."
+            ),
+        )
+        return redirect("novedades:lista_novedades")
+
+    if request.method == "POST":
+        formulario = NovedadForm(
+            request.POST,
+            instance=novedad,
+        )
+
+        if formulario.is_valid():
+            formulario.save()
+
+            messages.success(
+                request,
+                "La novedad fue actualizada correctamente.",
+            )
+
+            return redirect("novedades:lista_novedades")
+    else:
+        formulario = NovedadForm(instance=novedad)
+
+    contexto = {
+        "formulario": formulario,
+        "novedad": novedad,
+        "modo_edicion": True,
+    }
+
+    return render(
+        request,
+        "novedades/crear_novedad.html",
+        contexto,
+    )
+
+@login_required
+@require_POST
+def validar_novedad(request, pk):
+    novedad = get_object_or_404(
+        Novedad.objects.select_related(
+            "periodo",
+            "periodo__sucursal",
+        ),
+        pk=pk,
+    )
+
+    try:
+        novedad.validar(request.user)
+    except ValidationError as error:
+        messages.error(
+            request,
+            " ".join(error.messages),
+        )
+    else:
+        messages.success(
+            request,
+            "La novedad fue validada correctamente.",
+        )
+
+    return redirect("novedades:lista_novedades")
+
+@login_required
+def anular_novedad(request, pk):
+    novedad = get_object_or_404(
+        Novedad.objects.select_related(
+            "periodo",
+            "periodo__sucursal",
+            "colaborador",
+            "tipo_novedad",
+        ),
+        pk=pk,
+    )
+
+    if not novedad.puede_anular:
+        messages.error(
+            request,
+            "Esta novedad ya no puede ser anulada.",
+        )
+        return redirect("novedades:lista_novedades")
+
+    if request.method == "POST":
+        formulario = AnularNovedadForm(request.POST)
+
+        if formulario.is_valid():
+            try:
+                novedad.anular(
+                    request.user,
+                    formulario.cleaned_data["motivo_anulacion"],
+                )
+            except ValidationError as error:
+                formulario.add_error(
+                    None,
+                    " ".join(error.messages),
+                )
+            else:
+                messages.success(
+                    request,
+                    "La novedad fue anulada correctamente.",
+                )
+                return redirect("novedades:lista_novedades")
+    else:
+        formulario = AnularNovedadForm()
+
+    contexto = {
+        "formulario": formulario,
+        "novedad": novedad,
+    }
+
+    return render(
+        request,
+        "novedades/anular_novedad.html",
         contexto,
     )

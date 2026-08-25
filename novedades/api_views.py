@@ -1,4 +1,8 @@
-from rest_framework import permissions, viewsets
+from django.core.exceptions import ValidationError as DjangoValidationError
+from rest_framework import permissions, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
 
 from .models import (
     AFP,
@@ -88,6 +92,14 @@ class TipoNovedadViewSet(AutenticadoModelViewSet):
 
 
 class NovedadViewSet(AutenticadoModelViewSet):
+    http_method_names = [
+        "get",
+        "post",
+        "put",
+        "patch",
+        "head",
+        "options",
+    ]
     queryset = (
         Novedad.objects.select_related(
             "periodo",
@@ -96,6 +108,7 @@ class NovedadViewSet(AutenticadoModelViewSet):
             "tipo_novedad",
             "creado_por",
             "validado_por",
+            "anulado_por",
         )
         .all()
         .order_by("-creado_en")
@@ -103,29 +116,65 @@ class NovedadViewSet(AutenticadoModelViewSet):
     serializer_class = NovedadSerializer
 
     def perform_create(self, serializer):
-        datos_auditoria = {
-            "creado_por": self.request.user,
-        }
-
-        if (
-            serializer.validated_data.get("estado")
-            == Novedad.Estado.VALIDADA
-        ):
-            datos_auditoria["validado_por"] = self.request.user
-
-        serializer.save(**datos_auditoria)
-
-    def perform_update(self, serializer):
-        estado = serializer.validated_data.get(
-            "estado",
-            serializer.instance.estado,
+        serializer.save(
+            creado_por=self.request.user,
+            estado=Novedad.Estado.BORRADOR,
         )
 
-        validado_por = None
-        if estado == Novedad.Estado.VALIDADA:
-            validado_por = self.request.user
+    def perform_update(self, serializer):
+        if not serializer.instance.puede_editar:
+            raise ValidationError(
+                {
+                    "detail": (
+                        "Solo se pueden editar novedades en borrador "
+                        "pertenecientes a un período abierto."
+                    )
+                }
+            )
 
-        serializer.save(validado_por=validado_por)
+        serializer.save()
+
+    @action(detail=True, methods=["post"])
+    def validar(self, request, pk=None):
+        novedad = self.get_object()
+
+        try:
+            novedad.validar(request.user)
+        except DjangoValidationError as error:
+            if hasattr(error, "message_dict"):
+                detalle = error.message_dict
+            else:
+                detalle = {"detail": error.messages}
+
+            return Response(
+                detalle,
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response(self.get_serializer(novedad).data)
+
+
+    @action(detail=True, methods=["post"])
+    def anular(self, request, pk=None):
+        novedad = self.get_object()
+        motivo = request.data.get("motivo_anulacion", "")
+
+        try:
+            novedad.anular(request.user, motivo)
+        except DjangoValidationError as error:
+            if hasattr(error, "message_dict"):
+                detalle = error.message_dict
+            else:
+                detalle = {"detail": error.messages}
+
+            return Response(
+                detalle,
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response(self.get_serializer(novedad).data)
+
+
 
 
 class ExportacionViewSet(AutenticadoModelViewSet):

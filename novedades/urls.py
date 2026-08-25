@@ -17,4 +17,19 @@ urlpatterns = [
         views.crear_novedad,
         name="crear_novedad",
     ),
+    path(
+        "novedades/<int:pk>/editar/",
+        views.editar_novedad,
+        name="editar_novedad",
+    ),
+    path(
+        "novedades/<int:pk>/validar/",
+        views.validar_novedad,
+        name="validar_novedad",
+    ),
+    path(
+        "novedades/<int:pk>/anular/",
+        views.anular_novedad,
+        name="anular_novedad",
+    ),
 ]
