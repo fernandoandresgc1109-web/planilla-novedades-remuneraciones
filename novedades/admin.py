@@ -124,6 +124,9 @@ class NovedadAdmin(admin.ModelAdmin):
         "colaborador",
         "tipo_novedad",
         "estado",
+        "creado_por",
+        "validado_por",
+        "anulado_por",
         "creado_en",
     )
     search_fields = (
@@ -137,7 +140,16 @@ class NovedadAdmin(admin.ModelAdmin):
     list_filter = ("estado", "tipo_novedad", "periodo")
     ordering = ("-creado_en",)
     date_hierarchy = "creado_en"
-    readonly_fields = ("creado_en", "actualizado_en")
+    readonly_fields = (
+        "estado",
+        "validado_por",
+        "validado_en",
+        "anulado_por",
+        "anulado_en",
+        "motivo_anulacion",
+        "creado_en",
+        "actualizado_en",
+    )
 
 
 @admin.register(Exportacion)

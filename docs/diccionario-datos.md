@@ -170,6 +170,10 @@ Ejemplos de códigos iniciales:
 | `estado` | `CharField(15)` | Sí | Opciones controladas | Estado: borrador, validada o anulada. |
 | `creado_por` | `ForeignKey` | Sí | FK a usuario de Django | Usuario que registró la novedad. |
 | `validado_por` | `ForeignKey` | No | FK opcional a usuario | Usuario que validó la novedad. |
+| `validado_en` | `DateTimeField` | No | Opcional, automático al validar | Fecha y hora de validación. |
+| `anulado_por` | `ForeignKey` | No | FK opcional a usuario | Usuario que anuló la novedad. |
+| `anulado_en` | `DateTimeField` | No | Opcional, automático al anular | Fecha y hora de anulación. |
+| `motivo_anulacion` | `TextField` | No | Opcional; obligatorio al anular | Motivo por el cual se anuló la novedad. |
 | `creado_en` | `DateTimeField` | Sí | Automático | Fecha y hora de creación. |
 | `actualizado_en` | `DateTimeField` | Sí | Automático | Fecha y hora de la última modificación. |
 
@@ -210,12 +214,15 @@ Las entidades `Novedad` y `Exportacion` se relacionarán con los usuarios de Dja
 6. Las novedades expresadas en pesos deberán tener un monto.
 7. Las novedades expresadas en días o minutos deberán tener una cantidad.
 8. Las horas extras se almacenarán en minutos para evitar errores de interpretación.
-9. No se podrán modificar novedades de un período cerrado o exportado.
-10. Solamente usuarios autorizados podrán validar novedades y cerrar períodos.
-11. El sistema deberá advertir posibles novedades duplicadas.
-12. Los catálogos utilizados no se eliminarán físicamente; se marcarán como inactivos.
-13. Los datos sensibles no deberán aparecer en registros de errores públicos.
-14. Toda exportación deberá quedar asociada con el usuario y período correspondiente.
+9. Solo podrán editarse novedades en borrador pertenecientes a períodos abiertos.
+10. Solo podrán validarse novedades en borrador pertenecientes a períodos abiertos.
+11. Las novedades en borrador o validadas podrán anularse indicando un motivo de entre 10 y 500 caracteres.
+12. Las novedades anuladas no podrán editarse, validarse, anularse nuevamente ni eliminarse físicamente.
+13. Toda validación o anulación deberá registrar automáticamente el usuario y la fecha correspondiente.
+14. El sistema deberá advertir posibles novedades duplicadas.
+15. Los catálogos utilizados no se eliminarán físicamente; se marcarán como inactivos.
+16. Los datos sensibles no deberán aparecer en registros de errores públicos.
+17. Toda exportación deberá quedar asociada con el usuario y período correspondiente.
 
 ## 16. Correspondencia con la planilla actual
 

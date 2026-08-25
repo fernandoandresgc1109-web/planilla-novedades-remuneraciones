@@ -131,14 +131,12 @@ class ApiRestTests(APITestCase):
         )
         self.assertIsNone(novedad.validado_por)
 
-        respuesta_validacion = self.client.patch(
+        respuesta_validacion = self.client.post(
             reverse(
-                "api:novedad-detail",
+                "api:novedad-validar",
                 args=[novedad.pk],
             ),
-            {
-                "estado": Novedad.Estado.VALIDADA,
-            },
+            {},
             format="json",
         )
 
@@ -148,6 +146,11 @@ class ApiRestTests(APITestCase):
         )
 
         novedad.refresh_from_db()
+        self.assertEqual(
+            novedad.estado,
+            Novedad.Estado.VALIDADA,
+        )
+        self.assertIsNotNone(novedad.validado_en)
 
         self.assertEqual(
             novedad.validado_por,
@@ -182,4 +185,194 @@ class ApiRestTests(APITestCase):
         self.assertEqual(
             exportacion.generado_por,
             self.usuario,
+        )
+
+    def test_api_no_permite_cambiar_estado_directamente(self):
+        self.autenticar()
+
+        novedad = Novedad.objects.create(
+            periodo=self.periodo,
+            colaborador=self.colaborador,
+            tipo_novedad=self.tipo_novedad,
+            monto=50000,
+            observacion="Novedad ficticia para probar el estado.",
+            creado_por=self.usuario,
+        )
+
+        respuesta = self.client.patch(
+            reverse(
+                "api:novedad-detail",
+                args=[novedad.pk],
+            ),
+            {
+                "estado": Novedad.Estado.VALIDADA,
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            respuesta.status_code,
+            status.HTTP_200_OK,
+        )
+
+        novedad.refresh_from_db()
+
+        self.assertEqual(
+            novedad.estado,
+            Novedad.Estado.BORRADOR,
+        )
+        self.assertIsNone(novedad.validado_por)
+        self.assertIsNone(novedad.validado_en)
+
+    def test_api_anular_registra_auditoria(self):
+        self.autenticar()
+
+        novedad = Novedad.objects.create(
+            periodo=self.periodo,
+            colaborador=self.colaborador,
+            tipo_novedad=self.tipo_novedad,
+            monto=50000,
+            observacion="Novedad ficticia para anular.",
+            creado_por=self.usuario,
+        )
+
+        motivo = (
+            "Registro ficticio anulado mediante la API "
+            "para comprobar la auditoría."
+        )
+
+        respuesta = self.client.post(
+            reverse(
+                "api:novedad-anular",
+                args=[novedad.pk],
+            ),
+            {
+                "motivo_anulacion": motivo,
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            respuesta.status_code,
+            status.HTTP_200_OK,
+        )
+
+        novedad.refresh_from_db()
+
+        self.assertEqual(
+            novedad.estado,
+            Novedad.Estado.ANULADA,
+        )
+        self.assertEqual(
+            novedad.anulado_por,
+            self.usuario,
+        )
+        self.assertIsNotNone(novedad.anulado_en)
+        self.assertEqual(
+            novedad.motivo_anulacion,
+            motivo,
+        )
+
+    def test_api_rechaza_motivo_de_anulacion_corto(self):
+        self.autenticar()
+
+        novedad = Novedad.objects.create(
+            periodo=self.periodo,
+            colaborador=self.colaborador,
+            tipo_novedad=self.tipo_novedad,
+            monto=50000,
+            observacion="Novedad ficticia para probar el motivo.",
+            creado_por=self.usuario,
+        )
+
+        respuesta = self.client.post(
+            reverse(
+                "api:novedad-anular",
+                args=[novedad.pk],
+            ),
+            {
+                "motivo_anulacion": "Corto",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            respuesta.status_code,
+            status.HTTP_400_BAD_REQUEST,
+        )
+        self.assertIn(
+            "motivo_anulacion",
+            respuesta.data,
+        )
+
+        novedad.refresh_from_db()
+
+        self.assertEqual(
+            novedad.estado,
+            Novedad.Estado.BORRADOR,
+        )
+        self.assertIsNone(novedad.anulado_por)
+        self.assertIsNone(novedad.anulado_en)
+
+    def test_api_no_permite_editar_novedad_validada(self):
+        self.autenticar()
+
+        novedad = Novedad.objects.create(
+            periodo=self.periodo,
+            colaborador=self.colaborador,
+            tipo_novedad=self.tipo_novedad,
+            monto=50000,
+            observacion="Observación inicial ficticia.",
+            creado_por=self.usuario,
+        )
+        novedad.validar(self.usuario)
+
+        respuesta = self.client.patch(
+            reverse(
+                "api:novedad-detail",
+                args=[novedad.pk],
+            ),
+            {
+                "observacion": "Intento de modificación.",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            respuesta.status_code,
+            status.HTTP_400_BAD_REQUEST,
+        )
+
+        novedad.refresh_from_db()
+
+        self.assertEqual(
+            novedad.observacion,
+            "Observación inicial ficticia.",
+        )
+
+    def test_api_no_permite_eliminar_novedades(self):
+        self.autenticar()
+
+        novedad = Novedad.objects.create(
+            periodo=self.periodo,
+            colaborador=self.colaborador,
+            tipo_novedad=self.tipo_novedad,
+            monto=50000,
+            observacion="Novedad ficticia que no debe eliminarse.",
+            creado_por=self.usuario,
+        )
+
+        respuesta = self.client.delete(
+            reverse(
+                "api:novedad-detail",
+                args=[novedad.pk],
+            )
+        )
+
+        self.assertEqual(
+            respuesta.status_code,
+            status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+        self.assertTrue(
+            Novedad.objects.filter(pk=novedad.pk).exists()
         )

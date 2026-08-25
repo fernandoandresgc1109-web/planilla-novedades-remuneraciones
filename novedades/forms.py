@@ -194,3 +194,35 @@ class NovedadForm(forms.ModelForm):
                 )
 
         return datos
+
+
+
+class AnularNovedadForm(forms.Form):
+    motivo_anulacion = forms.CharField(
+        label="Motivo de anulación",
+        min_length=10,
+        max_length=500,
+        widget=forms.Textarea(
+            attrs={
+                "class": TEXTAREA_CLASSES,
+                "rows": 4,
+                "placeholder": (
+                    "Explica por qué debe anularse esta novedad."
+                ),
+            }
+        ),
+        help_text=(
+            "Escribe entre 10 y 500 caracteres. "
+            "El motivo quedará registrado para auditoría."
+        ),
+    )
+
+    def clean_motivo_anulacion(self):
+        motivo = self.cleaned_data["motivo_anulacion"].strip()
+
+        if len(motivo) < 10:
+            raise forms.ValidationError(
+                "El motivo debe tener al menos 10 caracteres."
+            )
+
+        return motivo

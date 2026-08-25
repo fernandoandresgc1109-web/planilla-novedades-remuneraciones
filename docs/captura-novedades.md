@@ -312,16 +312,23 @@ Después de incorporar estas pruebas, el proyecto cuenta con:
 | `templates/novedades/base_interno.html` | Incorpora el acceso al módulo en la navegación. |
 | `static/novedades/css/landing.css` | Contiene el CSS generado por Tailwind. |
 
-## 18. Funcionalidades pendientes
+## 18. Estado actual y funcionalidades pendientes
 
-Este módulo todavía no permite:
+El módulo ya permite:
 
-- Editar novedades existentes.
-- Validar novedades.
-- Anular novedades.
-- Eliminar registros.
+- Editar novedades en borrador pertenecientes a períodos abiertos.
+- Validar novedades con registro del usuario y la fecha.
+- Anular novedades indicando un motivo.
+- Consultar la trazabilidad de los cambios.
+- Aplicar las mismas reglas desde la interfaz web y la API REST.
+
+Las novedades no se eliminan físicamente. La anulación conserva el registro como evidencia histórica.
+
+Continúan pendientes:
+
 - Exportar la información.
 - Administrar colaboradores desde la interfaz interna personalizada.
+- Administrar períodos desde la interfaz interna personalizada.
 
 Estas funcionalidades serán desarrolladas en jornadas posteriores.
 

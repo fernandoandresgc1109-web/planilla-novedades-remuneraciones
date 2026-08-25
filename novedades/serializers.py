@@ -148,13 +148,22 @@ class NovedadSerializer(serializers.ModelSerializer):
             "estado",
             "creado_por",
             "validado_por",
+            "validado_en",
+            "anulado_por",
+            "anulado_en",
+            "motivo_anulacion",
             "creado_en",
             "actualizado_en",
         )
         read_only_fields = (
             "id",
+            "estado",
             "creado_por",
             "validado_por",
+            "validado_en",
+            "anulado_por",
+            "anulado_en",
+            "motivo_anulacion",
             "creado_en",
             "actualizado_en",
         )

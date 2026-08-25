@@ -65,36 +65,37 @@ Los recursos fueron implementados mediante `ModelViewSet`.
 | `POST` | Crear un registro |
 | `PUT` | Reemplazar completamente un registro |
 | `PATCH` | Modificar parcialmente un registro |
-| `DELETE` | Eliminar un registro |
+| `DELETE` | Eliminar registros en los recursos que lo permiten |
 | `OPTIONS` | Consultar las operaciones permitidas |
 
-## 6. Paginación
+### Operaciones especiales de novedades
 
-Los listados utilizan paginación por número de página y muestran un máximo de 25 registros por página.
+La gestión de estados utiliza acciones controladas:
 
-La respuesta contiene la siguiente estructura:
+| Método | Ruta | Operación |
+|---|---|---|
+| `POST` | `/api/novedades/{id}/validar/` | Validar una novedad en borrador |
+| `POST` | `/api/novedades/{id}/anular/` | Anular una novedad indicando el motivo |
 
-```json
-{
-    "count": 0,
-    "next": null,
-    "previous": null,
-    "results": []
-}
-```
+El recurso de novedades no permite `DELETE`. Una novedad debe anularse para conservar su historial y auditoría.
 
 ## 7. Campos de trazabilidad
 
-Algunos campos son asignados automáticamente por el servidor y no pueden ser enviados directamente por el cliente.
+Algunos campos son asignados automáticamente por el servidor y son de solo lectura.
 
 ### Novedades
 
+- `estado`: estado controlado mediante las acciones de validación y anulación.
 - `creado_por`: usuario autenticado que registra la novedad.
-- `validado_por`: usuario que cambia el estado a `VALIDADA`.
+- `validado_por`: usuario que valida la novedad.
+- `validado_en`: fecha y hora de validación.
+- `anulado_por`: usuario que anula la novedad.
+- `anulado_en`: fecha y hora de anulación.
+- `motivo_anulacion`: explicación registrada durante la anulación.
 - `creado_en`: fecha y hora de creación.
 - `actualizado_en`: fecha y hora de la última modificación.
 
-Si una novedad deja de tener el estado `VALIDADA`, el campo `validado_por` se limpia automáticamente.
+El campo `estado` no puede cambiarse directamente mediante `PUT` o `PATCH`. Para validar o anular deben utilizarse las acciones especiales de la API.
 
 ### Exportaciones
 
@@ -124,25 +125,17 @@ Los serializadores convierten los modelos de Django a representaciones JSON y va
 
 ## 9. Pruebas automáticas de la API
 
-Se agregaron cinco pruebas específicas:
+Actualmente existen diez pruebas específicas de la API:
 
 1. Rechazo de solicitudes realizadas por usuarios no autenticados.
 2. Comprobación de los 10 recursos de la raíz de la API.
 3. Comprobación de la paginación de los listados.
-4. Creación y validación de novedades con trazabilidad del usuario.
+4. Creación y validación de novedades con trazabilidad.
 5. Creación de exportaciones con registro automático del usuario.
+6. Protección contra cambios directos del estado.
+7. Anulación de novedades con auditoría.
+8. Rechazo de motivos de anulación demasiado cortos.
+9. Bloqueo de edición de novedades validadas.
+10. Rechazo de la eliminación de novedades mediante `DELETE`.
 
-En conjunto, el proyecto cuenta actualmente con 13 pruebas automáticas ejecutadas correctamente.
-
-## 10. Protección de datos
-
-Las pruebas automáticas utilizan exclusivamente información ficticia.
-
-No deben incorporarse al repositorio:
-
-- Contraseñas.
-- Credenciales de base de datos.
-- Archivos `.env`.
-- RUT reales.
-- Nombres reales de colaboradores.
-- Información bancaria, previsional o salarial real.
+En conjunto, el proyecto cuenta actualmente con 44 pruebas automáticas ejecutadas correctamente.
