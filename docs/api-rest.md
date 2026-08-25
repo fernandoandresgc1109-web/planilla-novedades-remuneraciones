@@ -138,4 +138,4 @@ Actualmente existen diez pruebas específicas de la API:
 9. Bloqueo de edición de novedades validadas.
 10. Rechazo de la eliminación de novedades mediante `DELETE`.
 
-En conjunto, el proyecto cuenta actualmente con 44 pruebas automáticas ejecutadas correctamente.
+En conjunto, el proyecto cuenta actualmente con 52 pruebas automáticas ejecutadas correctamente.

@@ -1,6 +1,12 @@
 from django import forms
 
-from .models import Colaborador, Novedad, PeriodoLiquidacion, TipoNovedad
+from .models import (
+    Colaborador,
+    Exportacion,
+    Novedad,
+    PeriodoLiquidacion,
+    TipoNovedad,
+)
 
 
 CONTROL_CLASSES = (
@@ -226,3 +232,66 @@ class AnularNovedadForm(forms.Form):
             )
 
         return motivo
+
+class ExportacionForm(forms.Form):
+    periodo = forms.ModelChoiceField(
+        label="Período de liquidación",
+        queryset=PeriodoLiquidacion.objects.none(),
+        empty_label="Seleccione un período",
+        widget=forms.Select(
+            attrs={"class": CONTROL_CLASSES}
+        ),
+        help_text=(
+            "Solo se muestran períodos que contienen "
+            "novedades validadas."
+        ),
+    )
+
+    formato = forms.ChoiceField(
+        label="Formato del archivo",
+        choices=[
+            ("", "Seleccione un formato"),
+            *Exportacion.Formato.choices,
+        ],
+        widget=forms.Select(
+            attrs={"class": CONTROL_CLASSES}
+        ),
+        help_text="Puedes descargar la información en Excel o CSV.",
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields["periodo"].queryset = (
+            PeriodoLiquidacion.objects.filter(
+                novedades__estado=Novedad.Estado.VALIDADA
+            )
+            .select_related("sucursal")
+            .distinct()
+            .order_by("-anio", "-mes", "sucursal__nombre")
+        )
+
+    def clean_periodo(self):
+        periodo = self.cleaned_data["periodo"]
+
+        if periodo.novedades.filter(
+            estado=Novedad.Estado.BORRADOR
+        ).exists():
+            raise forms.ValidationError(
+                (
+                    "No se puede exportar este período porque "
+                    "todavía contiene novedades en borrador."
+                )
+            )
+
+        if not periodo.novedades.filter(
+            estado=Novedad.Estado.VALIDADA
+        ).exists():
+            raise forms.ValidationError(
+                (
+                    "El período debe contener al menos una "
+                    "novedad validada."
+                )
+            )
+
+        return periodo

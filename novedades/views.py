@@ -2,12 +2,21 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from .forms import AnularNovedadForm, NovedadForm
-from .models import Colaborador, Novedad, PeriodoLiquidacion
+from .exportadores import construir_nombre_archivo, generar_archivo
+from .forms import AnularNovedadForm, ExportacionForm, NovedadForm
+from .models import (
+    Colaborador,
+    Exportacion,
+    Novedad,
+    PeriodoLiquidacion,
+)
 
 
 def inicio(request):
@@ -251,5 +260,141 @@ def anular_novedad(request, pk):
     return render(
         request,
         "novedades/anular_novedad.html",
+        contexto,
+    )
+
+@login_required
+def exportar_novedades(request):
+    exportaciones_recientes = (
+        Exportacion.objects.select_related(
+            "periodo",
+            "periodo__sucursal",
+            "generado_por",
+        )
+        .order_by("-fecha_generacion")[:10]
+    )
+
+    if request.method == "POST":
+        formulario = ExportacionForm(request.POST)
+
+        if formulario.is_valid():
+            with transaction.atomic():
+                periodo = (
+                    PeriodoLiquidacion.objects.select_for_update()
+                    .select_related("sucursal")
+                    .get(
+                        pk=formulario.cleaned_data["periodo"].pk
+                    )
+                )
+
+                list(
+                    Novedad.objects.select_for_update()
+                    .filter(periodo=periodo)
+                    .values_list("pk", flat=True)
+                )
+
+                tiene_borradores = Novedad.objects.filter(
+                    periodo=periodo,
+                    estado=Novedad.Estado.BORRADOR,
+                ).exists()
+
+                registros = (
+                    Novedad.objects.filter(
+                        periodo=periodo,
+                        estado=Novedad.Estado.VALIDADA,
+                    )
+                    .select_related(
+                        "periodo",
+                        "periodo__sucursal",
+                        "colaborador",
+                        "tipo_novedad",
+                        "validado_por",
+                    )
+                    .order_by(
+                        "colaborador__apellidos",
+                        "colaborador__nombres",
+                        "tipo_novedad__nombre",
+                        "id",
+                    )
+                )
+
+                cantidad_registros = registros.count()
+
+                if tiene_borradores:
+                    formulario.add_error(
+                        "periodo",
+                        (
+                            "No se puede exportar este período porque "
+                            "todavía contiene novedades en borrador."
+                        ),
+                    )
+                elif cantidad_registros == 0:
+                    formulario.add_error(
+                        "periodo",
+                        (
+                            "El período debe contener al menos una "
+                            "novedad validada."
+                        ),
+                    )
+                else:
+                    formato = formulario.cleaned_data["formato"]
+
+                    nombre_archivo = construir_nombre_archivo(
+                        periodo,
+                        formato,
+                    )
+
+                    contenido, tipo_contenido = generar_archivo(
+                        formato,
+                        registros,
+                    )
+
+                    Exportacion.objects.create(
+                        periodo=periodo,
+                        generado_por=request.user,
+                        formato=formato,
+                        nombre_archivo=nombre_archivo,
+                        cantidad_registros=cantidad_registros,
+                    )
+
+                    if (
+                        periodo.estado
+                        != PeriodoLiquidacion.Estado.EXPORTADO
+                    ):
+                        campos_actualizados = ["estado"]
+                        periodo.estado = (
+                            PeriodoLiquidacion.Estado.EXPORTADO
+                        )
+
+                        if periodo.fecha_cierre is None:
+                            periodo.fecha_cierre = timezone.now()
+                            campos_actualizados.append("fecha_cierre")
+
+                        periodo.save(
+                            update_fields=campos_actualizados
+                        )
+
+                    respuesta = HttpResponse(
+                        contenido,
+                        content_type=tipo_contenido,
+                    )
+                    respuesta["Content-Disposition"] = (
+                        f'attachment; filename="{nombre_archivo}"'
+                    )
+                    respuesta["X-Content-Type-Options"] = "nosniff"
+                    respuesta["Cache-Control"] = "no-store, private"
+
+                    return respuesta
+    else:
+        formulario = ExportacionForm()
+
+    contexto = {
+        "formulario": formulario,
+        "exportaciones_recientes": exportaciones_recientes,
+    }
+
+    return render(
+        request,
+        "novedades/exportar_novedades.html",
         contexto,
     )

@@ -223,6 +223,11 @@ Las entidades `Novedad` y `Exportacion` se relacionarán con los usuarios de Dja
 15. Los catálogos utilizados no se eliminarán físicamente; se marcarán como inactivos.
 16. Los datos sensibles no deberán aparecer en registros de errores públicos.
 17. Toda exportación deberá quedar asociada con el usuario y período correspondiente.
+18. Un período solo podrá exportarse si contiene al menos una novedad validada y no mantiene novedades en borrador.
+19. Los archivos exportados incluirán únicamente novedades validadas y excluirán los registros anulados.
+20. Una exportación correcta cambiará el período al estado `EXPORTADO` y registrará su fecha de cierre cuando todavía no exista.
+21. Cada reexportación generará un nuevo registro de auditoría sin modificar la primera fecha de cierre del período.
+22. Los archivos CSV y Excel se generarán en memoria; la base de datos conservará únicamente su metadata de auditoría.
 
 ## 16. Correspondencia con la planilla actual
 

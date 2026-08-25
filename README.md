@@ -4,7 +4,7 @@
 
 ## Estado del proyecto
 
-Fase actual: gestión de estados de las novedades implementada; preparación del módulo de exportación de información.
+Fase actual: módulo de exportación de novedades implementado; preparación de las pruebas funcionales, de seguridad y del despliegue.
 
 *Fecha de inicio:* 10 de agosto de 2026.  
 *Fecha límite:* 2 de septiembre de 2026.
@@ -161,6 +161,7 @@ Cada jornada de trabajo finalizará con:
 - [Acceso interno y panel principal](docs/acceso-interno.md): describe la autenticación, protección de rutas, funcionamiento del panel, diseño adaptable, medidas de seguridad y pruebas automatizadas.
 - [Captura y consulta de novedades](docs/captura-novedades.md): explica el formulario, las validaciones, la trazabilidad, la búsqueda, los filtros, la paginación, el diseño adaptable y las pruebas del módulo.
 - [Gestión de estados de las novedades](docs/gestion-estados-novedades.md): documenta la edición, validación, anulación, auditoría, transiciones permitidas, protección de la API y pruebas automáticas.
+- [Exportación de novedades](docs/exportacion-novedades.md): explica la generación de archivos CSV y Excel, reglas de exportación, auditoría, seguridad, reexportación y pruebas automáticas.
 
 Los archivos reales utilizados para analizar el proceso no se incluyen en el repositorio porque contienen información personal, bancaria, previsional y salarial.
 
@@ -176,9 +177,9 @@ Los archivos reales utilizados para analizar el proceso no se incluyen en el rep
 - [x] Diseño del modelo entidad-relación.
 - [x] Desarrollo de los modelos.
 - [x] Desarrollo de la API REST.
-- [ ] Desarrollo de la interfaz web (landing, login, panel y gestión de novedades completados; exportaciones y otros módulos internos pendientes).
+- [x] Desarrollo de la interfaz web (landing, login, panel, gestión de novedades y exportaciones completados).
 - [x] Implementación de las validaciones.
-- [ ] Implementación de las exportaciones.
+- [x] Implementación de las exportaciones.
 - [ ] Pruebas funcionales y de seguridad.
 - [ ] Despliegue en la nube.
 - [ ] Presentación y entrega final.
@@ -197,6 +198,7 @@ Los archivos reales utilizados para analizar el proceso no se incluyen en el rep
 | 21-08-2026 | Implementación del acceso y panel interno | Se integró la autenticación por sesión de Django; se creó un login personalizado y adaptable; se protegió el panel principal para usuarios autenticados; se incorporaron indicadores consultados desde PostgreSQL; se implementaron navegación interna, cierre seguro de sesión y redirección mediante `next`; se documentó el funcionamiento y se ejecutaron correctamente 25 pruebas automáticas. |
 | 22-08-2026 | Implementación de captura y consulta de novedades | Se desarrollaron el formulario interno, validaciones condicionales, listado, búsqueda, filtros, paginación y trazabilidad automática; se verificó el diseño adaptable y se probaron registros completamente ficticios; se documentó el módulo y se ejecutaron correctamente 31 pruebas automáticas. |
 | 24-08-2026 | Implementación de la gestión de estados de las novedades | Se desarrollaron las funciones de edición, validación y anulación con reglas centralizadas en el modelo; se incorporaron usuarios, fechas y motivos de auditoría mediante una nueva migración; se protegieron las transiciones en la interfaz web, la API REST y el panel administrativo; se impidió la eliminación física de novedades y se ejecutaron correctamente 44 pruebas automáticas. |
+| 25-08-2026 | Implementación de la exportación de novedades | Se desarrolló la generación de archivos CSV y Excel con información validada; se bloquearon períodos con borradores y se excluyeron registros anulados; se incorporaron auditoría, cierre del período, reexportación, protección contra fórmulas y generación segura en memoria; se documentó el módulo y se ejecutaron correctamente 52 pruebas automáticas. |
 
 ## Consideraciones de privacidad
 
