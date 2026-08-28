@@ -157,7 +157,39 @@ class ApiRestTests(APITestCase):
             self.usuario,
         )
 
-    def test_crear_exportacion_registra_usuario(self):
+    def _crear_exportacion_auditoria(self):
+        return Exportacion.objects.create(
+            periodo=self.periodo,
+            generado_por=self.usuario,
+            formato=Exportacion.Formato.XLSX,
+            nombre_archivo="exportacion_auditoria.xlsx",
+            cantidad_registros=1,
+        )
+
+    def test_api_permite_consultar_exportaciones(self):
+        self.autenticar()
+        exportacion = self._crear_exportacion_auditoria()
+
+        respuesta_lista = self.client.get(
+            reverse("api:exportacion-list")
+        )
+        respuesta_detalle = self.client.get(
+            reverse(
+                "api:exportacion-detail",
+                args=[exportacion.pk],
+            )
+        )
+
+        self.assertEqual(
+            respuesta_lista.status_code,
+            status.HTTP_200_OK,
+        )
+        self.assertEqual(
+            respuesta_detalle.status_code,
+            status.HTTP_200_OK,
+        )
+
+    def test_api_no_permite_crear_exportaciones_manualmente(self):
         self.autenticar()
 
         respuesta = self.client.post(
@@ -165,27 +197,96 @@ class ApiRestTests(APITestCase):
             {
                 "periodo": self.periodo.pk,
                 "formato": Exportacion.Formato.XLSX,
-                "nombre_archivo": (
-                    "exportacion_api_ficticia.xlsx"
-                ),
-                "cantidad_registros": 0,
+                "nombre_archivo": "exportacion_ficticia.xlsx",
+                "cantidad_registros": 999,
             },
             format="json",
         )
 
         self.assertEqual(
             respuesta.status_code,
-            status.HTTP_201_CREATED,
+            status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+        self.assertFalse(
+            Exportacion.objects.filter(
+                nombre_archivo="exportacion_ficticia.xlsx"
+            ).exists()
         )
 
-        exportacion = Exportacion.objects.get(
-            pk=respuesta.data["id"]
+    def test_api_no_permite_reemplazar_exportaciones(self):
+        self.autenticar()
+        exportacion = self._crear_exportacion_auditoria()
+
+        respuesta = self.client.put(
+            reverse(
+                "api:exportacion-detail",
+                args=[exportacion.pk],
+            ),
+            {
+                "periodo": self.periodo.pk,
+                "formato": Exportacion.Formato.CSV,
+                "nombre_archivo": "exportacion_alterada.csv",
+                "cantidad_registros": 999,
+            },
+            format="json",
         )
 
         self.assertEqual(
-            exportacion.generado_por,
-            self.usuario,
+            respuesta.status_code,
+            status.HTTP_405_METHOD_NOT_ALLOWED,
         )
+
+        exportacion.refresh_from_db()
+        self.assertEqual(
+            exportacion.nombre_archivo,
+            "exportacion_auditoria.xlsx",
+        )
+        self.assertEqual(exportacion.cantidad_registros, 1)
+
+    def test_api_no_permite_modificar_exportaciones(self):
+        self.autenticar()
+        exportacion = self._crear_exportacion_auditoria()
+
+        respuesta = self.client.patch(
+            reverse(
+                "api:exportacion-detail",
+                args=[exportacion.pk],
+            ),
+            {
+                "cantidad_registros": 999,
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            respuesta.status_code,
+            status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+
+        exportacion.refresh_from_db()
+        self.assertEqual(exportacion.cantidad_registros, 1)
+
+    def test_api_no_permite_eliminar_exportaciones(self):
+        self.autenticar()
+        exportacion = self._crear_exportacion_auditoria()
+
+        respuesta = self.client.delete(
+            reverse(
+                "api:exportacion-detail",
+                args=[exportacion.pk],
+            )
+        )
+
+        self.assertEqual(
+            respuesta.status_code,
+            status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+        self.assertTrue(
+            Exportacion.objects.filter(
+                pk=exportacion.pk
+            ).exists()
+        )
+
 
     def test_api_no_permite_cambiar_estado_directamente(self):
         self.autenticar()

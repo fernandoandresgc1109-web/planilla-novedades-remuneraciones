@@ -201,7 +201,7 @@
                         <tbody class="divide-y divide-slate-100 bg-white">
                             {% for novedad in pagina %}
                                 <tr class="transition hover:bg-slate-50">
-                                    <td class="whitespace-nowrap px-5 py-4">
+                                    <td class="px-5 py-4">
                                         <p class="font-bold text-slate-950">
                                             {{ novedad.colaborador.nombres }}
                                             {{ novedad.colaborador.apellidos }}
@@ -258,6 +258,11 @@
                                         >
                                             {{ novedad.get_estado_display }}
                                         </span>
+                                        {% if novedad.estado == "ANULADA" and novedad.motivo_anulacion %}
+                                            <p class="mt-2 w-56 whitespace-normal break-words text-xs font-semibold text-red-800">
+                                                Motivo: {{ novedad.motivo_anulacion }}
+                                            </p>
+                                        {% endif %}
                                     </td>
 
                                     <td class="whitespace-nowrap px-5 py-4 text-sm text-slate-700">
@@ -385,6 +390,16 @@
                                 </div>
                             </dl>
 
+                            {% if novedad.estado == "ANULADA" and novedad.motivo_anulacion %}
+                                <div class="mt-5 border-t border-slate-100 pt-4">
+                                    <p class="text-xs font-bold text-red-800">
+                                        Motivo de anulación
+                                    </p>
+                                    <p class="mt-1 whitespace-normal break-words text-sm text-slate-700">
+                                        {{ novedad.motivo_anulacion }}
+                                    </p>
+                                </div>
+                            {% endif %}
                             <p class="mt-5 border-t border-slate-100 pt-4 text-xs text-slate-500">
                                 Registrado por
                                 <strong>{{ novedad.creado_por.username }}</strong>

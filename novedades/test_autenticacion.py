@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
-from django.test import TestCase
-from django.urls import reverse
+from django.test import Client, TestCase
+from django.urls import Resolver404, resolve, reverse
 
 
 class AccesoInternoTests(TestCase):
@@ -92,6 +92,72 @@ class AccesoInternoTests(TestCase):
             reverse("novedades:panel")
         )
         self.assertEqual(respuesta_panel.status_code, 302)
+
+    def test_login_rechaza_redireccion_a_dominio_externo(self):
+        respuesta = self.client.post(
+            reverse("login"),
+            {
+                "username": self.usuario.username,
+                "password": self.clave,
+                "next": (
+                    "https://sitio-malicioso.example/"
+                    "robar-sesion"
+                ),
+            },
+        )
+
+        self.assertRedirects(
+            respuesta,
+            reverse("novedades:panel"),
+        )
+
+    def test_logout_no_acepta_get(self):
+        self.client.force_login(self.usuario)
+
+        respuesta = self.client.get(reverse("logout"))
+
+        self.assertEqual(respuesta.status_code, 405)
+
+        respuesta_panel = self.client.get(
+            reverse("novedades:panel")
+        )
+        self.assertEqual(respuesta_panel.status_code, 200)
+
+    def test_login_rechaza_post_sin_token_csrf(self):
+        cliente_csrf = Client(enforce_csrf_checks=True)
+
+        respuesta = cliente_csrf.post(
+            reverse("login"),
+            {
+                "username": self.usuario.username,
+                "password": self.clave,
+            },
+        )
+
+        self.assertEqual(respuesta.status_code, 403)
+
+    def test_logout_rechaza_post_sin_token_csrf(self):
+        cliente_csrf = Client(enforce_csrf_checks=True)
+        cliente_csrf.force_login(self.usuario)
+
+        respuesta = cliente_csrf.post(reverse("logout"))
+
+        self.assertEqual(respuesta.status_code, 403)
+
+    def test_rutas_de_clave_no_implementadas_no_se_exponen(self):
+        rutas_no_implementadas = (
+            "/cuentas/password_change/",
+            "/cuentas/password_change/done/",
+            "/cuentas/password_reset/",
+            "/cuentas/password_reset/done/",
+            "/cuentas/reset/usuario/token/",
+            "/cuentas/reset/done/",
+        )
+
+        for ruta in rutas_no_implementadas:
+            with self.assertRaises(Resolver404):
+                resolve(ruta)
+
 
     def test_landing_contiene_enlaces_al_panel(self):
         respuesta = self.client.get(reverse("novedades:inicio"))
