@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.views.decorators.cache import never_cache
 
 from .exportadores import construir_nombre_archivo, generar_archivo
 from .forms import AnularNovedadForm, ExportacionForm, NovedadForm
@@ -22,7 +23,7 @@ from .models import (
 def inicio(request):
     return render(request, "novedades/inicio.html")
 
-
+@never_cache
 @login_required
 def panel(request):
     contexto = {
@@ -42,7 +43,7 @@ def panel(request):
 
     return render(request, "novedades/panel.html", contexto)
 
-
+@never_cache
 @login_required
 def lista_novedades(request):
     registros = Novedad.objects.select_related(
@@ -101,7 +102,7 @@ def lista_novedades(request):
         contexto,
     )
 
-
+@never_cache
 @login_required
 def crear_novedad(request):
     if request.method == "POST":
@@ -132,6 +133,7 @@ def crear_novedad(request):
         contexto,
     )
 
+@never_cache
 @login_required
 def editar_novedad(request, pk):
     novedad = get_object_or_404(
@@ -184,6 +186,7 @@ def editar_novedad(request, pk):
         contexto,
     )
 
+@never_cache
 @login_required
 @require_POST
 def validar_novedad(request, pk):
@@ -210,6 +213,7 @@ def validar_novedad(request, pk):
 
     return redirect("novedades:lista_novedades")
 
+@never_cache
 @login_required
 def anular_novedad(request, pk):
     novedad = get_object_or_404(
@@ -263,6 +267,7 @@ def anular_novedad(request, pk):
         contexto,
     )
 
+@never_cache
 @login_required
 def exportar_novedades(request):
     exportaciones_recientes = (

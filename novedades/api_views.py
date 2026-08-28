@@ -33,23 +33,41 @@ from .serializers import (
 class AutenticadoModelViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated,)
 
+class CatalogoAutenticadoModelViewSet(
+    AutenticadoModelViewSet
+):
+    http_method_names = [
+        "get",
+        "post",
+        "put",
+        "patch",
+        "head",
+        "options",
+    ]
 
-class SucursalViewSet(AutenticadoModelViewSet):
+class AutenticadoReadOnlyModelViewSet(
+    viewsets.ReadOnlyModelViewSet
+):
+    permission_classes = (permissions.IsAuthenticated,)
+
+class SucursalViewSet(CatalogoAutenticadoModelViewSet):
     queryset = Sucursal.objects.all().order_by("nombre")
     serializer_class = SucursalSerializer
 
 
-class BancoViewSet(AutenticadoModelViewSet):
+class BancoViewSet(CatalogoAutenticadoModelViewSet):
     queryset = Banco.objects.all().order_by("nombre")
     serializer_class = BancoSerializer
 
 
-class AFPViewSet(AutenticadoModelViewSet):
+class AFPViewSet(CatalogoAutenticadoModelViewSet):
     queryset = AFP.objects.all().order_by("nombre")
     serializer_class = AFPSerializer
 
 
-class InstitucionSaludViewSet(AutenticadoModelViewSet):
+class InstitucionSaludViewSet(
+    CatalogoAutenticadoModelViewSet
+):
     queryset = InstitucionSalud.objects.all().order_by("nombre")
     serializer_class = InstitucionSaludSerializer
 
@@ -86,7 +104,9 @@ class PeriodoLiquidacionViewSet(AutenticadoModelViewSet):
     serializer_class = PeriodoLiquidacionSerializer
 
 
-class TipoNovedadViewSet(AutenticadoModelViewSet):
+class TipoNovedadViewSet(
+    CatalogoAutenticadoModelViewSet
+):
     queryset = TipoNovedad.objects.all().order_by("nombre")
     serializer_class = TipoNovedadSerializer
 
@@ -177,7 +197,9 @@ class NovedadViewSet(AutenticadoModelViewSet):
 
 
 
-class ExportacionViewSet(AutenticadoModelViewSet):
+class ExportacionViewSet(
+    AutenticadoReadOnlyModelViewSet
+):
     queryset = (
         Exportacion.objects.select_related(
             "periodo",
@@ -188,6 +210,3 @@ class ExportacionViewSet(AutenticadoModelViewSet):
         .order_by("-fecha_generacion")
     )
     serializer_class = ExportacionSerializer
-
-    def perform_create(self, serializer):
-        serializer.save(generado_por=self.request.user)

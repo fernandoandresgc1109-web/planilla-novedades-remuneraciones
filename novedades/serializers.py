@@ -181,8 +181,4 @@ class ExportacionSerializer(serializers.ModelSerializer):
             "nombre_archivo",
             "cantidad_registros",
         )
-        read_only_fields = (
-            "id",
-            "generado_por",
-            "fecha_generacion",
-        )
+        read_only_fields = fields

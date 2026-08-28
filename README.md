@@ -162,6 +162,7 @@ Cada jornada de trabajo finalizará con:
 - [Captura y consulta de novedades](docs/captura-novedades.md): explica el formulario, las validaciones, la trazabilidad, la búsqueda, los filtros, la paginación, el diseño adaptable y las pruebas del módulo.
 - [Gestión de estados de las novedades](docs/gestion-estados-novedades.md): documenta la edición, validación, anulación, auditoría, transiciones permitidas, protección de la API y pruebas automáticas.
 - [Exportación de novedades](docs/exportacion-novedades.md): explica la generación de archivos CSV y Excel, reglas de exportación, auditoría, seguridad, reexportación y pruebas automáticas.
+- [Pruebas funcionales y de seguridad](docs/pruebas-funcionales-seguridad.md): registra las pruebas automáticas y manuales, verificaciones de exportación, auditorías de seguridad, configuración para producción y resultados obtenidos.
 
 Los archivos reales utilizados para analizar el proceso no se incluyen en el repositorio porque contienen información personal, bancaria, previsional y salarial.
 
@@ -180,7 +181,7 @@ Los archivos reales utilizados para analizar el proceso no se incluyen en el rep
 - [x] Desarrollo de la interfaz web (landing, login, panel, gestión de novedades y exportaciones completados).
 - [x] Implementación de las validaciones.
 - [x] Implementación de las exportaciones.
-- [ ] Pruebas funcionales y de seguridad.
+- [x] Pruebas funcionales y de seguridad.
 - [ ] Despliegue en la nube.
 - [ ] Presentación y entrega final.
 
@@ -199,6 +200,7 @@ Los archivos reales utilizados para analizar el proceso no se incluyen en el rep
 | 22-08-2026 | Implementación de captura y consulta de novedades | Se desarrollaron el formulario interno, validaciones condicionales, listado, búsqueda, filtros, paginación y trazabilidad automática; se verificó el diseño adaptable y se probaron registros completamente ficticios; se documentó el módulo y se ejecutaron correctamente 31 pruebas automáticas. |
 | 24-08-2026 | Implementación de la gestión de estados de las novedades | Se desarrollaron las funciones de edición, validación y anulación con reglas centralizadas en el modelo; se incorporaron usuarios, fechas y motivos de auditoría mediante una nueva migración; se protegieron las transiciones en la interfaz web, la API REST y el panel administrativo; se impidió la eliminación física de novedades y se ejecutaron correctamente 44 pruebas automáticas. |
 | 25-08-2026 | Implementación de la exportación de novedades | Se desarrolló la generación de archivos CSV y Excel con información validada; se bloquearon períodos con borradores y se excluyeron registros anulados; se incorporaron auditoría, cierre del período, reexportación, protección contra fórmulas y generación segura en memoria; se documentó el módulo y se ejecutaron correctamente 52 pruebas automáticas. |
+| 28-08-2026 | Pruebas funcionales y de seguridad | Se realizaron 30 comprobaciones funcionales manuales en escritorio y dispositivos móviles; se reforzaron la autenticación, la protección de sesiones, la API REST, la administración y las reglas de eliminación; se verificaron las exportaciones CSV y Excel; se actualizaron las configuraciones para producción y la dependencia `sqlparse`; las auditorías de dependencias y código no encontraron vulnerabilidades, y se ejecutaron correctamente 72 pruebas automáticas. |
 
 ## Consideraciones de privacidad
 

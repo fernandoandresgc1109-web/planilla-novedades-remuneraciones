@@ -129,6 +129,54 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Production security
+
+SECURE_SSL_REDIRECT = env.bool(
+    "DJANGO_SECURE_SSL_REDIRECT",
+    default=not DEBUG,
+)
+
+SESSION_COOKIE_SECURE = env.bool(
+    "DJANGO_SESSION_COOKIE_SECURE",
+    default=not DEBUG,
+)
+
+CSRF_COOKIE_SECURE = env.bool(
+    "DJANGO_CSRF_COOKIE_SECURE",
+    default=not DEBUG,
+)
+
+SECURE_HSTS_SECONDS = env.int(
+    "DJANGO_SECURE_HSTS_SECONDS",
+    default=0,
+)
+
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool(
+    "DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS",
+    default=False,
+)
+
+SECURE_HSTS_PRELOAD = env.bool(
+    "DJANGO_SECURE_HSTS_PRELOAD",
+    default=False,
+)
+
+CSRF_TRUSTED_ORIGINS = env.list(
+    "DJANGO_CSRF_TRUSTED_ORIGINS",
+    default=[],
+)
+
+SECURE_PROXY_SSL_HEADER = (
+    ("HTTP_X_FORWARDED_PROTO", "https")
+    if env.bool(
+        "DJANGO_TRUST_X_FORWARDED_PROTO",
+        default=False,
+    )
+    else None
+)
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 

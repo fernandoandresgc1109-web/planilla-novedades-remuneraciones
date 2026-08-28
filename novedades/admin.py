@@ -13,9 +13,16 @@ from .models import (
     TipoNovedad,
 )
 
+class SinEliminacionAdminMixin:
+    def has_delete_permission(self, request, obj=None):
+        return False
+
 
 @admin.register(Sucursal)
-class SucursalAdmin(admin.ModelAdmin):
+class SucursalAdmin(
+    SinEliminacionAdminMixin,
+    admin.ModelAdmin,
+):
     list_display = ("codigo", "nombre", "activo")
     search_fields = ("codigo", "nombre")
     list_filter = ("activo",)
@@ -23,7 +30,10 @@ class SucursalAdmin(admin.ModelAdmin):
 
 
 @admin.register(Banco)
-class BancoAdmin(admin.ModelAdmin):
+class BancoAdmin(
+    SinEliminacionAdminMixin,
+    admin.ModelAdmin,
+):
     list_display = ("codigo", "nombre", "activo")
     search_fields = ("codigo", "nombre")
     list_filter = ("activo",)
@@ -31,7 +41,10 @@ class BancoAdmin(admin.ModelAdmin):
 
 
 @admin.register(AFP)
-class AFPAdmin(admin.ModelAdmin):
+class AFPAdmin(
+    SinEliminacionAdminMixin,
+    admin.ModelAdmin,
+):
     list_display = ("codigo", "nombre", "activo")
     search_fields = ("codigo", "nombre")
     list_filter = ("activo",)
@@ -39,7 +52,10 @@ class AFPAdmin(admin.ModelAdmin):
 
 
 @admin.register(InstitucionSalud)
-class InstitucionSaludAdmin(admin.ModelAdmin):
+class InstitucionSaludAdmin(
+    SinEliminacionAdminMixin,
+    admin.ModelAdmin,
+):
     list_display = ("codigo", "nombre", "tipo", "activo")
     search_fields = ("codigo", "nombre")
     list_filter = ("tipo", "activo")
@@ -103,7 +119,10 @@ class PeriodoLiquidacionAdmin(admin.ModelAdmin):
 
 
 @admin.register(TipoNovedad)
-class TipoNovedadAdmin(admin.ModelAdmin):
+class TipoNovedadAdmin(
+    SinEliminacionAdminMixin,
+    admin.ModelAdmin,
+):
     list_display = (
         "codigo",
         "nombre",
@@ -117,7 +136,10 @@ class TipoNovedadAdmin(admin.ModelAdmin):
 
 
 @admin.register(Novedad)
-class NovedadAdmin(admin.ModelAdmin):
+class NovedadAdmin(
+    SinEliminacionAdminMixin,
+    admin.ModelAdmin,
+):
     list_display = (
         "id",
         "periodo",

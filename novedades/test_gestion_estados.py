@@ -240,6 +240,15 @@ class GestionEstadosNovedadTests(TestCase):
         self.assertFalse(novedad.puede_validar)
         self.assertFalse(novedad.puede_anular)
 
+        respuesta_listado = self.client.get(
+            reverse("novedades:lista_novedades")
+        )
+
+        self.assertContains(
+            respuesta_listado,
+            motivo,
+        )
+
     def test_anulacion_rechaza_motivo_demasiado_corto(self):
         novedad = self.crear_novedad()
 
