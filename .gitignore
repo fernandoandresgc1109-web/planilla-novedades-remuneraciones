@@ -219,3 +219,5 @@ __marimo__/
 
 # Node.js
 node_modules/
+# Django collected static files
+staticfiles/

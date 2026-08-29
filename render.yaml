@@ -1,0 +1,48 @@
+databases:
+  - name: planilla-novedades-db
+    databaseName: planilla_novedades
+    user: planilla_app
+    plan: free
+    region: virginia
+    postgresMajorVersion: "18"
+
+services:
+  - type: web
+    name: planilla-novedades-remuneraciones
+    runtime: python
+    plan: free
+    region: virginia
+    buildCommand: bash build.sh
+    startCommand: python -m gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+    healthCheckPath: /
+    autoDeployTrigger: commit
+    initialDeployHook: python manage.py createsuperuser --no-input
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: planilla-novedades-db
+          property: connectionString
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DJANGO_SECURE_SSL_REDIRECT
+        value: "True"
+      - key: DJANGO_SESSION_COOKIE_SECURE
+        value: "True"
+      - key: DJANGO_CSRF_COOKIE_SECURE
+        value: "True"
+      - key: DJANGO_SECURE_HSTS_SECONDS
+        value: "3600"
+      - key: DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS
+        value: "False"
+      - key: DJANGO_SECURE_HSTS_PRELOAD
+        value: "False"
+      - key: DJANGO_TRUST_X_FORWARDED_PROTO
+        value: "True"
+      - key: DJANGO_SUPERUSER_USERNAME
+        sync: false
+      - key: DJANGO_SUPERUSER_EMAIL
+        sync: false
+      - key: DJANGO_SUPERUSER_PASSWORD
+        sync: false
