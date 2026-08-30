@@ -61,3 +61,18 @@ class LandingPageTests(SimpleTestCase):
         self.assertContains(respuesta, "data-menu-button")
         self.assertContains(respuesta, "data-mobile-menu")
         self.assertContains(respuesta, 'aria-expanded="false"')
+    def test_landing_muestra_el_estado_final_del_proyecto(self):
+        respuesta = self.client.get(self.url)
+
+        self.assertContains(
+            respuesta,
+            "Aplicación funcional y desplegada en Render.",
+        )
+        self.assertContains(
+            respuesta,
+            "Versión académica preparada para la presentación",
+        )
+        self.assertNotContains(
+            respuesta,
+            "Interfaz web en construcción",
+        )
