@@ -4,7 +4,9 @@
 
 ## Estado del proyecto
 
-Fase actual: módulo de exportación de novedades implementado; preparación de las pruebas funcionales, de seguridad y del despliegue.
+Fase actual: aplicación desplegada y verificada en Render; preparación de la presentación y entrega final.
+
+Aplicación desplegada: [planilla-novedades-remuneraciones.onrender.com](https://planilla-novedades-remuneraciones.onrender.com/)
 
 *Fecha de inicio:* 10 de agosto de 2026.  
 *Fecha límite:* 2 de septiembre de 2026.
@@ -99,13 +101,13 @@ Podrá visualizar información autorizada sin modificar los registros.
 | Lenguaje principal | Python |
 | Backend | Django y Django REST Framework |
 | Frontend | HTML5, Tailwind CSS y JavaScript Vanilla |
-| Base de datos de desarrollo | SQLite |
+| Base de datos de desarrollo | PostgreSQL 18 |
 | Base de datos de producción | PostgreSQL |
-| Panel administrativo | Django Admin / Jazzmin |
+| Panel administrativo | Django Admin |
 | Control de versiones | Git |
 | Repositorio | GitHub |
-| Servidor previsto | Render |
-| Base de datos administrada prevista | Supabase |
+| Servidor de producción | Render |
+| Base de datos administrada | PostgreSQL 18 en Render |
 | Metodología | Agile / Scrum Web |
 
 ## Arquitectura inicial
@@ -121,24 +123,24 @@ La aplicación utilizará una arquitectura web Full-Stack:
 7. GitHub conservará el código y la documentación.
 8. El servicio cloud permitirá el acceso a la aplicación desplegada.
 
-## Seguridad prevista
+## Seguridad implementada
 
-La aplicación utilizará autenticación mediante JWT o sesiones seguras y permisos según roles.
+La aplicación utiliza autenticación mediante sesiones seguras de Django y permisos para usuarios autenticados.
 
-El acceso CORS estará limitado al dominio autorizado. Los datos serán validados y sanitizados antes de su procesamiento. El ORM de Django ayudará a prevenir inyecciones SQL y el escape de contenido protegerá contra ataques XSS.
+Los datos son validados antes de su procesamiento. El ORM de Django ayuda a prevenir inyecciones SQL y el escape de plantillas protege contra ataques XSS.
 
-La comunicación utilizará HTTPS, las credenciales permanecerán en variables de entorno y las operaciones importantes quedarán registradas para su auditoría.
+La comunicación utiliza HTTPS; las cookies de sesión y CSRF son seguras; las credenciales permanecen en variables de entorno, y las operaciones importantes quedan registradas para su auditoría.
 
-## Estimación académica de infraestructura
+## Infraestructura de demostración
 
 | Recurso | Proveedor | Frecuencia | Costo estimado |
 |---|---|---|---:|
-| Dominio | Namecheap | Anual | USD 14 |
-| Servidor web | Render | Mensual estimado | USD 7 |
-| Base de datos PostgreSQL | Supabase | Mensual estimado | USD 10 |
-| *Total estimado* |  |  | *USD 31* |
+| Subdominio `onrender.com` | Render | Incluido | USD 0 |
+| Servicio web | Render Free | Mensual | USD 0 |
+| Base de datos PostgreSQL | Render Free | 30 días | USD 0 |
+| *Total de la demostración* |  |  | *USD 0* |
 
-Los precios serán confirmados antes del despliegue. Durante el desarrollo se priorizarán herramientas y planes gratuitos.
+El servicio web gratuito puede suspenderse por inactividad y tardar en responder la primera vez. La base de datos gratuita utilizada para la demostración expira el 28 de septiembre de 2026.
 
 ## Metodología de trabajo
 
@@ -163,6 +165,7 @@ Cada jornada de trabajo finalizará con:
 - [Gestión de estados de las novedades](docs/gestion-estados-novedades.md): documenta la edición, validación, anulación, auditoría, transiciones permitidas, protección de la API y pruebas automáticas.
 - [Exportación de novedades](docs/exportacion-novedades.md): explica la generación de archivos CSV y Excel, reglas de exportación, auditoría, seguridad, reexportación y pruebas automáticas.
 - [Pruebas funcionales y de seguridad](docs/pruebas-funcionales-seguridad.md): registra las pruebas automáticas y manuales, verificaciones de exportación, auditorías de seguridad, configuración para producción y resultados obtenidos.
+- [Despliegue en Render](docs/despliegue-render.md): documenta la infraestructura, configuración, verificaciones en producción, Lighthouse y limitaciones del plan gratuito.
 
 Los archivos reales utilizados para analizar el proceso no se incluyen en el repositorio porque contienen información personal, bancaria, previsional y salarial.
 
@@ -182,7 +185,7 @@ Los archivos reales utilizados para analizar el proceso no se incluyen en el rep
 - [x] Implementación de las validaciones.
 - [x] Implementación de las exportaciones.
 - [x] Pruebas funcionales y de seguridad.
-- [ ] Despliegue en la nube.
+- [x] Despliegue en la nube.
 - [ ] Presentación y entrega final.
 
 ## Bitácora de desarrollo
@@ -201,6 +204,8 @@ Los archivos reales utilizados para analizar el proceso no se incluyen en el rep
 | 24-08-2026 | Implementación de la gestión de estados de las novedades | Se desarrollaron las funciones de edición, validación y anulación con reglas centralizadas en el modelo; se incorporaron usuarios, fechas y motivos de auditoría mediante una nueva migración; se protegieron las transiciones en la interfaz web, la API REST y el panel administrativo; se impidió la eliminación física de novedades y se ejecutaron correctamente 44 pruebas automáticas. |
 | 25-08-2026 | Implementación de la exportación de novedades | Se desarrolló la generación de archivos CSV y Excel con información validada; se bloquearon períodos con borradores y se excluyeron registros anulados; se incorporaron auditoría, cierre del período, reexportación, protección contra fórmulas y generación segura en memoria; se documentó el módulo y se ejecutaron correctamente 52 pruebas automáticas. |
 | 28-08-2026 | Pruebas funcionales y de seguridad | Se realizaron 30 comprobaciones funcionales manuales en escritorio y dispositivos móviles; se reforzaron la autenticación, la protección de sesiones, la API REST, la administración y las reglas de eliminación; se verificaron las exportaciones CSV y Excel; se actualizaron las configuraciones para producción y la dependencia `sqlparse`; las auditorías de dependencias y código no encontraron vulnerabilidades, y se ejecutaron correctamente 72 pruebas automáticas. |
+| 29-08-2026 | Preparación del despliegue en Render | Se incorporaron Gunicorn, WhiteNoise, el script de construcción, la configuración segura y el Blueprint; los cambios se integraron en `main` mediante el pull request 10. |
+| 30-08-2026 | Despliegue y verificación en producción | Se verificaron la landing, autenticación, panel, API REST, datos ficticios y exportación Excel. Lighthouse móvil obtuvo 100 en rendimiento, 95 en accesibilidad, 100 en buenas prácticas y 100 en SEO. |
 
 ## Consideraciones de privacidad
 
