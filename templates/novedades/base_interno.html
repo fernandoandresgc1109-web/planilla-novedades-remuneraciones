@@ -179,7 +179,7 @@
                             </p>
 
                             <p class="truncate text-xs text-slate-400">
-                                Usuario autenticado
+                                {{ rol_usuario|default:"Usuario autenticado" }}
                             </p>
                         </div>
                     </div>
@@ -235,7 +235,7 @@
                             </p>
 
                             <p class="text-xs text-slate-500">
-                                Sesión activa
+                                {{ rol_usuario|default:"Sesión activa" }}
                             </p>
                         </div>
 

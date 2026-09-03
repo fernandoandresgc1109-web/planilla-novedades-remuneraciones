@@ -36,12 +36,18 @@
                     </p>
                 </div>
 
-                <a
-                    href="{% url 'novedades:crear_novedad' %}"
-                    class="inline-flex items-center justify-center rounded-xl bg-white px-5 py-3 font-black text-emerald-900 shadow-lg transition hover:-translate-y-0.5 hover:bg-emerald-50 focus:outline-none focus:ring-4 focus:ring-emerald-300/40"
-                >
-                    + Registrar novedad
-                </a>
+                {% if puede_modificar %}
+                    <a
+                        href="{% url 'novedades:crear_novedad' %}"
+                        class="inline-flex items-center justify-center rounded-xl bg-white px-5 py-3 font-black text-emerald-900 shadow-lg transition hover:-translate-y-0.5 hover:bg-emerald-50 focus:outline-none focus:ring-4 focus:ring-emerald-300/40"
+                    >
+                        + Registrar novedad
+                    </a>
+                {% elif es_contabilidad %}
+                    <div class="rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-bold text-emerald-100 backdrop-blur">
+                        Modo solo lectura y exportación
+                    </div>
+                {% endif %}
             </div>
         </section>
 
@@ -274,47 +280,53 @@
                                         </p>
                                     </td>
                                     <td class="px-5 py-4">
-    <div class="flex min-w-max flex-wrap gap-2">
-        {% if novedad.puede_editar %}
-            <a
-                href="{% url 'novedades:editar_novedad' novedad.pk %}"
-                class="inline-flex items-center justify-center rounded-lg border border-slate-300 px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-100"
-            >
-                Editar
-            </a>
-        {% endif %}
+                                        <div class="flex min-w-max flex-wrap gap-2">
+                                            {% if puede_modificar %}
+                                                {% if novedad.puede_editar %}
+                                                    <a
+                                                        href="{% url 'novedades:editar_novedad' novedad.pk %}"
+                                                        class="inline-flex items-center justify-center rounded-lg border border-slate-300 px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-100"
+                                                    >
+                                                        Editar
+                                                    </a>
+                                                {% endif %}
 
-        {% if novedad.puede_validar %}
-            <form
-                method="post"
-                action="{% url 'novedades:validar_novedad' novedad.pk %}"
-            >
-                {% csrf_token %}
-                <button
-                    type="submit"
-                    class="inline-flex items-center justify-center rounded-lg bg-emerald-700 px-3 py-2 text-xs font-bold text-white transition hover:bg-emerald-800"
-                >
-                    Validar
-                </button>
-            </form>
-        {% endif %}
+                                                {% if novedad.puede_validar %}
+                                                    <form
+                                                        method="post"
+                                                        action="{% url 'novedades:validar_novedad' novedad.pk %}"
+                                                    >
+                                                        {% csrf_token %}
+                                                        <button
+                                                            type="submit"
+                                                            class="inline-flex items-center justify-center rounded-lg bg-emerald-700 px-3 py-2 text-xs font-bold text-white transition hover:bg-emerald-800"
+                                                        >
+                                                            Validar
+                                                        </button>
+                                                    </form>
+                                                {% endif %}
 
-        {% if novedad.puede_anular %}
-            <a
-                href="{% url 'novedades:anular_novedad' novedad.pk %}"
-                class="inline-flex items-center justify-center rounded-lg border border-red-200 px-3 py-2 text-xs font-bold text-red-700 transition hover:bg-red-50"
-            >
-                Anular
-            </a>
-        {% endif %}
+                                                {% if novedad.puede_anular %}
+                                                    <a
+                                                        href="{% url 'novedades:anular_novedad' novedad.pk %}"
+                                                        class="inline-flex items-center justify-center rounded-lg border border-red-200 px-3 py-2 text-xs font-bold text-red-700 transition hover:bg-red-50"
+                                                    >
+                                                        Anular
+                                                    </a>
+                                                {% endif %}
 
-        {% if not novedad.puede_editar and not novedad.puede_validar and not novedad.puede_anular %}
-            <span class="text-xs font-semibold text-slate-400">
-                Sin acciones
-            </span>
-        {% endif %}
-    </div>
-                                </td>
+                                                {% if not novedad.puede_editar and not novedad.puede_validar and not novedad.puede_anular %}
+                                                    <span class="text-xs font-semibold text-slate-400">
+                                                        Sin acciones
+                                                    </span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-xs font-semibold text-slate-400">
+                                                    Solo lectura
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -406,45 +418,51 @@
                                 el {{ novedad.creado_en|date:"d/m/Y H:i" }}.
                             </p>
                             <div class="mt-4 flex flex-col gap-2">
-    {% if novedad.puede_editar %}
-        <a
-            href="{% url 'novedades:editar_novedad' novedad.pk %}"
-            class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700"
-        >
-            Editar
-        </a>
-    {% endif %}
+                                {% if puede_modificar %}
+                                    {% if novedad.puede_editar %}
+                                        <a
+                                            href="{% url 'novedades:editar_novedad' novedad.pk %}"
+                                            class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700"
+                                        >
+                                            Editar
+                                        </a>
+                                    {% endif %}
 
-    {% if novedad.puede_validar %}
-        <form
-            method="post"
-            action="{% url 'novedades:validar_novedad' novedad.pk %}"
-        >
-            {% csrf_token %}
-            <button
-                type="submit"
-                class="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-emerald-700 px-4 py-2 text-sm font-bold text-white"
-            >
-                Validar
-            </button>
-        </form>
-    {% endif %}
+                                    {% if novedad.puede_validar %}
+                                        <form
+                                            method="post"
+                                            action="{% url 'novedades:validar_novedad' novedad.pk %}"
+                                        >
+                                            {% csrf_token %}
+                                            <button
+                                                type="submit"
+                                                class="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-emerald-700 px-4 py-2 text-sm font-bold text-white"
+                                            >
+                                                Validar
+                                            </button>
+                                        </form>
+                                    {% endif %}
 
-    {% if novedad.puede_anular %}
-        <a
-            href="{% url 'novedades:anular_novedad' novedad.pk %}"
-            class="inline-flex min-h-11 items-center justify-center rounded-xl border border-red-200 px-4 py-2 text-sm font-bold text-red-700"
-        >
-            Anular
-        </a>
-    {% endif %}
+                                    {% if novedad.puede_anular %}
+                                        <a
+                                            href="{% url 'novedades:anular_novedad' novedad.pk %}"
+                                            class="inline-flex min-h-11 items-center justify-center rounded-xl border border-red-200 px-4 py-2 text-sm font-bold text-red-700"
+                                        >
+                                            Anular
+                                        </a>
+                                    {% endif %}
 
-    {% if not novedad.puede_editar and not novedad.puede_validar and not novedad.puede_anular %}
-        <p class="text-center text-sm font-semibold text-slate-400">
-            Sin acciones disponibles
-        </p>
-    {% endif %}
-</div>
+                                    {% if not novedad.puede_editar and not novedad.puede_validar and not novedad.puede_anular %}
+                                        <p class="text-center text-sm font-semibold text-slate-400">
+                                            Sin acciones disponibles
+                                        </p>
+                                    {% endif %}
+                                {% else %}
+                                    <p class="text-center text-xs font-semibold text-slate-400">
+                                        Solo lectura (sin acciones)
+                                    </p>
+                                {% endif %}
+                            </div>
                         </article>
                     {% endfor %}
                 </div>
@@ -463,12 +481,14 @@
                         para realizar la consulta.
                     </p>
 
-                    <a
-                        href="{% url 'novedades:crear_novedad' %}"
-                        class="mt-6 inline-flex items-center justify-center rounded-xl bg-emerald-700 px-5 py-3 font-bold text-white transition hover:bg-emerald-800"
-                    >
-                        Registrar novedad
-                    </a>
+                    {% if puede_modificar %}
+                        <a
+                            href="{% url 'novedades:crear_novedad' %}"
+                            class="mt-6 inline-flex items-center justify-center rounded-xl bg-emerald-700 px-5 py-3 font-bold text-white transition hover:bg-emerald-800"
+                        >
+                            Registrar novedad
+                        </a>
+                    {% endif %}
                 </div>
             {% endif %}
 

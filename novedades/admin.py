@@ -13,7 +13,27 @@ from .models import (
     TipoNovedad,
 )
 
-class SinEliminacionAdminMixin:
+from .permisos import es_usuario_contabilidad
+
+
+class RestriccionContabilidadAdminMixin:
+    def has_add_permission(self, request):
+        if es_usuario_contabilidad(request.user):
+            return False
+        return super().has_add_permission(request)
+
+    def has_change_permission(self, request, obj=None):
+        if es_usuario_contabilidad(request.user):
+            return False
+        return super().has_change_permission(request, obj=obj)
+
+    def has_delete_permission(self, request, obj=None):
+        if es_usuario_contabilidad(request.user):
+            return False
+        return super().has_delete_permission(request, obj=obj)
+
+
+class SinEliminacionAdminMixin(RestriccionContabilidadAdminMixin):
     def has_delete_permission(self, request, obj=None):
         return False
 
@@ -63,7 +83,7 @@ class InstitucionSaludAdmin(
 
 
 @admin.register(Colaborador)
-class ColaboradorAdmin(admin.ModelAdmin):
+class ColaboradorAdmin(RestriccionContabilidadAdminMixin, admin.ModelAdmin):
     list_display = (
         "rut",
         "apellidos",
@@ -82,7 +102,7 @@ class ColaboradorAdmin(admin.ModelAdmin):
 
 
 @admin.register(Contrato)
-class ContratoAdmin(admin.ModelAdmin):
+class ContratoAdmin(RestriccionContabilidadAdminMixin, admin.ModelAdmin):
     list_display = (
         "colaborador",
         "tipo_contrato",
@@ -103,7 +123,9 @@ class ContratoAdmin(admin.ModelAdmin):
 
 
 @admin.register(PeriodoLiquidacion)
-class PeriodoLiquidacionAdmin(admin.ModelAdmin):
+class PeriodoLiquidacionAdmin(
+    RestriccionContabilidadAdminMixin, admin.ModelAdmin
+):
     list_display = (
         "sucursal",
         "anio",

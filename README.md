@@ -88,7 +88,7 @@ Podrá administrar usuarios, colaboradores, contratos, entidades y configuracion
 
 ### Contabilidad
 
-Podrá registrar, revisar, consolidar y exportar las novedades de remuneraciones.
+Podrá visualizar, consultar y exportar a Excel las novedades de remuneraciones, sin permisos de modificación ni registro.
 
 ### Consulta
 

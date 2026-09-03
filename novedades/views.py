@@ -18,6 +18,7 @@ from .models import (
     Novedad,
     PeriodoLiquidacion,
 )
+from .permisos import puede_modificar_novedades
 
 
 def inicio(request):
@@ -105,6 +106,16 @@ def lista_novedades(request):
 @never_cache
 @login_required
 def crear_novedad(request):
+    if not puede_modificar_novedades(request.user):
+        messages.error(
+            request,
+            (
+                "El perfil de Contabilidad solo tiene permisos para "
+                "visualizar y exportar información. No puede registrar novedades."
+            ),
+        )
+        return redirect("novedades:lista_novedades")
+
     if request.method == "POST":
         formulario = NovedadForm(request.POST)
 
@@ -136,6 +147,13 @@ def crear_novedad(request):
 @never_cache
 @login_required
 def editar_novedad(request, pk):
+    if not puede_modificar_novedades(request.user):
+        messages.error(
+            request,
+            "El perfil de Contabilidad no tiene permisos para editar novedades.",
+        )
+        return redirect("novedades:lista_novedades")
+
     novedad = get_object_or_404(
         Novedad.objects.select_related(
             "periodo",
@@ -190,6 +208,13 @@ def editar_novedad(request, pk):
 @login_required
 @require_POST
 def validar_novedad(request, pk):
+    if not puede_modificar_novedades(request.user):
+        messages.error(
+            request,
+            "El perfil de Contabilidad no tiene permisos para validar novedades.",
+        )
+        return redirect("novedades:lista_novedades")
+
     novedad = get_object_or_404(
         Novedad.objects.select_related(
             "periodo",
@@ -216,6 +241,13 @@ def validar_novedad(request, pk):
 @never_cache
 @login_required
 def anular_novedad(request, pk):
+    if not puede_modificar_novedades(request.user):
+        messages.error(
+            request,
+            "El perfil de Contabilidad no tiene permisos para anular novedades.",
+        )
+        return redirect("novedades:lista_novedades")
+
     novedad = get_object_or_404(
         Novedad.objects.select_related(
             "periodo",

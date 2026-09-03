@@ -16,6 +16,7 @@ from .models import (
     Sucursal,
     TipoNovedad,
 )
+from .permisos import puede_modificar_novedades
 from .serializers import (
     AFPSerializer,
     BancoSerializer,
@@ -30,8 +31,31 @@ from .serializers import (
 )
 
 
+class PermisoModificacionOReadOnly(permissions.BasePermission):
+    """
+    Permite métodos de solo lectura (GET, HEAD, OPTIONS) a todo usuario autenticado.
+    Las mutaciones (POST, PUT, PATCH, DELETE) requieren no pertenecer a Contabilidad.
+    """
+    message = (
+        "El perfil de Contabilidad solo tiene permisos para visualizar "
+        "y exportar información."
+    )
+
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        return puede_modificar_novedades(request.user)
+
+
 class AutenticadoModelViewSet(viewsets.ModelViewSet):
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (
+        permissions.IsAuthenticated,
+        PermisoModificacionOReadOnly,
+    )
 
 class CatalogoAutenticadoModelViewSet(
     AutenticadoModelViewSet
