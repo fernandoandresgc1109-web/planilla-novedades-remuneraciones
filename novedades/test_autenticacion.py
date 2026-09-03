@@ -146,8 +146,6 @@ class AccesoInternoTests(TestCase):
 
     def test_rutas_de_clave_no_implementadas_no_se_exponen(self):
         rutas_no_implementadas = (
-            "/cuentas/password_change/",
-            "/cuentas/password_change/done/",
             "/cuentas/password_reset/",
             "/cuentas/password_reset/done/",
             "/cuentas/reset/usuario/token/",
@@ -158,6 +156,61 @@ class AccesoInternoTests(TestCase):
             with self.assertRaises(Resolver404):
                 resolve(ruta)
 
+    def test_pagina_cambio_clave_requiere_autenticacion(self):
+        respuesta = self.client.get(reverse("password_change"))
+        self.assertRedirects(
+            respuesta,
+            f"{reverse('login')}?next={reverse('password_change')}",
+        )
+
+    def test_pagina_cambio_clave_responde_a_usuario_autenticado(self):
+        self.client.force_login(self.usuario)
+        respuesta = self.client.get(reverse("password_change"))
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertTemplateUsed(
+            respuesta,
+            "registration/password_change_form.html",
+        )
+        self.assertContains(respuesta, "Cambiar contraseña")
+
+    def test_cambio_clave_exitoso(self):
+        self.client.force_login(self.usuario)
+        nueva_clave = "NuevaClavePersonal2026!"
+
+        respuesta = self.client.post(
+            reverse("password_change"),
+            {
+                "old_password": self.clave,
+                "new_password1": nueva_clave,
+                "new_password2": nueva_clave,
+            },
+        )
+
+        self.assertRedirects(respuesta, reverse("password_change_done"))
+        self.usuario.refresh_from_db()
+        self.assertTrue(self.usuario.check_password(nueva_clave))
+
+        # Verificar acceso a la página de confirmación
+        respuesta_done = self.client.get(reverse("password_change_done"))
+        self.assertEqual(respuesta_done.status_code, 200)
+        self.assertTemplateUsed(
+            respuesta_done,
+            "registration/password_change_done.html",
+        )
+
+    def test_comando_reset_clave(self):
+        from django.core.management import call_command
+        clave_temporal = "TemporalSegura2026!"
+
+        call_command(
+            "reset_clave",
+            self.usuario.username,
+            password=clave_temporal,
+        )
+
+        self.usuario.refresh_from_db()
+        self.assertTrue(self.usuario.check_password(clave_temporal))
 
     def test_landing_contiene_enlaces_al_panel(self):
         respuesta = self.client.get(reverse("novedades:inicio"))
