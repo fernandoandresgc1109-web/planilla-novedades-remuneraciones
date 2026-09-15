@@ -96,21 +96,27 @@ class NovedadForm(forms.ModelForm):
             ),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, sucursal=None, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields["periodo"].queryset = (
-            PeriodoLiquidacion.objects.filter(
-                estado=PeriodoLiquidacion.Estado.ABIERTO
-            )
-            .select_related("sucursal")
-            .order_by("-anio", "-mes", "sucursal__nombre")
+        periodos_qs = PeriodoLiquidacion.objects.filter(
+            estado=PeriodoLiquidacion.Estado.ABIERTO
+        ).select_related("sucursal")
+
+        colaboradores_qs = Colaborador.objects.filter(
+            activo=True
+        ).select_related("sucursal")
+
+        if sucursal:
+            periodos_qs = periodos_qs.filter(sucursal=sucursal)
+            colaboradores_qs = colaboradores_qs.filter(sucursal=sucursal)
+
+        self.fields["periodo"].queryset = periodos_qs.order_by(
+            "-anio", "-mes", "sucursal__nombre"
         )
 
-        self.fields["colaborador"].queryset = (
-            Colaborador.objects.filter(activo=True)
-            .select_related("sucursal")
-            .order_by("apellidos", "nombres")
+        self.fields["colaborador"].queryset = colaboradores_qs.order_by(
+            "apellidos", "nombres"
         )
 
         self.fields["tipo_novedad"].queryset = (
@@ -127,6 +133,7 @@ class NovedadForm(forms.ModelForm):
         self.fields["tipo_novedad"].empty_label = (
             "Seleccione un tipo de novedad"
         )
+
 
     def clean(self):
         datos = super().clean()
@@ -259,17 +266,24 @@ class ExportacionForm(forms.Form):
         help_text="Puedes descargar la información en Excel o CSV.",
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, sucursal=None, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields["periodo"].queryset = (
+        periodos_qs = (
             PeriodoLiquidacion.objects.filter(
                 novedades__estado=Novedad.Estado.VALIDADA
             )
             .select_related("sucursal")
             .distinct()
-            .order_by("-anio", "-mes", "sucursal__nombre")
         )
+
+        if sucursal:
+            periodos_qs = periodos_qs.filter(sucursal=sucursal)
+
+        self.fields["periodo"].queryset = periodos_qs.order_by(
+            "-anio", "-mes", "sucursal__nombre"
+        )
+
 
     def clean_periodo(self):
         periodo = self.cleaned_data["periodo"]

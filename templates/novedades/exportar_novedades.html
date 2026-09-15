@@ -13,14 +13,22 @@
                         Proceso contable
                     </p>
 
-                    <h1 class="mt-3 text-3xl font-black tracking-tight sm:text-4xl">
-                        Exportar novedades
-                    </h1>
+                    <div class="mt-3 flex flex-wrap items-center gap-3">
+                        <h1 class="text-3xl font-black tracking-tight sm:text-4xl">
+                            Exportar novedades
+                        </h1>
+                        {% if sucursal_activa %}
+                            <span class="rounded-full bg-white/20 px-3 py-1 text-xs font-bold text-white backdrop-blur">
+                                🏢 {{ sucursal_activa.nombre }}
+                            </span>
+                        {% endif %}
+                    </div>
 
                     <p class="mt-4 max-w-3xl text-base leading-7 text-emerald-100">
                         Descarga las novedades validadas de un período en formato
                         Excel o CSV para continuar con el proceso de remuneraciones.
                     </p>
+
                 </div>
 
                 <div class="flex flex-wrap gap-3">

@@ -80,21 +80,32 @@ La primera versión no realizará:
 
 La aplicación preparará y validará las novedades para su posterior procesamiento por contabilidad.
 
-## Usuarios previstos
+## Usuarios y roles previstos
 
-### Administrador
+### Administrador General (Superusuario)
 
-Podrá administrar usuarios, colaboradores, contratos, entidades y configuraciones generales.
+Tiene alcance global en todo el sistema. Puede alternar entre todas las sucursales, administrar usuarios, crear sedes, colaboradores, contratos, entidades y configuraciones generales.
 
-### Contabilidad
+### Operador de Sucursal (ej: `PEDREGAL_PUENTE_ALTO`)
 
-Podrá visualizar, consultar y exportar a Excel las novedades de remuneraciones, sin permisos de modificación ni registro.
+Opera con aislamiento estricto sobre su sucursal asignada. Puede gestionar colaboradores, contratos, períodos y novedades de su sede, pero **no puede visualizar ni modificar datos de otras sucursales** y **no tiene permisos para crear usuarios del sistema**.
 
-### Consulta
+### Contabilidad (Multi-sucursal)
 
-Podrá visualizar información autorizada sin modificar los registros.
+Tiene acceso global de solo lectura y exportación. Puede alternar entre las diferentes sucursales y consultar/exportar a Excel o CSV las novedades de cada una por separado. Tiene bloqueada cualquier mutación o registro.
+
+## Comandos de gestión
+
+```bash
+# Provisionar una nueva sucursal y su usuario operador asignado
+python manage.py crear_sucursal_operador PUENTE_ALTO "Pedregal Puente Alto" --username PEDREGAL_PUENTE_ALTO --direccion "Av. Concha y Toro 500"
+
+# Restablecer o asignar una clave temporal a cualquier usuario
+python manage.py reset_clave PEDREGAL_PUENTE_ALTO --password "ClaveSegura2026!"
+```
 
 ## Stack tecnológico
+
 
 | Componente | Tecnología |
 |---|---|

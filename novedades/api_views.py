@@ -16,7 +16,7 @@ from .models import (
     Sucursal,
     TipoNovedad,
 )
-from .permisos import puede_modificar_novedades
+from .permisos import obtener_sucursal_usuario, puede_modificar_novedades
 from .serializers import (
     AFPSerializer,
     BancoSerializer,
@@ -29,6 +29,7 @@ from .serializers import (
     SucursalSerializer,
     TipoNovedadSerializer,
 )
+
 
 
 class PermisoModificacionOReadOnly(permissions.BasePermission):
@@ -75,8 +76,14 @@ class AutenticadoReadOnlyModelViewSet(
     permission_classes = (permissions.IsAuthenticated,)
 
 class SucursalViewSet(CatalogoAutenticadoModelViewSet):
-    queryset = Sucursal.objects.all().order_by("nombre")
     serializer_class = SucursalSerializer
+
+    def get_queryset(self):
+        qs = Sucursal.objects.all().order_by("nombre")
+        sucursal_usuario = obtener_sucursal_usuario(self.request.user)
+        if sucursal_usuario:
+            return qs.filter(pk=sucursal_usuario.pk)
+        return qs
 
 
 class BancoViewSet(CatalogoAutenticadoModelViewSet):
@@ -97,35 +104,53 @@ class InstitucionSaludViewSet(
 
 
 class ColaboradorViewSet(AutenticadoModelViewSet):
-    queryset = (
-        Colaborador.objects.select_related(
-            "sucursal",
-            "banco",
-            "afp",
-            "institucion_salud",
-        )
-        .all()
-        .order_by("apellidos", "nombres")
-    )
     serializer_class = ColaboradorSerializer
+
+    def get_queryset(self):
+        qs = (
+            Colaborador.objects.select_related(
+                "sucursal",
+                "banco",
+                "afp",
+                "institucion_salud",
+            )
+            .all()
+            .order_by("apellidos", "nombres")
+        )
+        sucursal_usuario = obtener_sucursal_usuario(self.request.user)
+        if sucursal_usuario:
+            return qs.filter(sucursal=sucursal_usuario)
+        return qs
 
 
 class ContratoViewSet(AutenticadoModelViewSet):
-    queryset = (
-        Contrato.objects.select_related("colaborador")
-        .all()
-        .order_by("-fecha_inicio")
-    )
     serializer_class = ContratoSerializer
+
+    def get_queryset(self):
+        qs = (
+            Contrato.objects.select_related("colaborador", "colaborador__sucursal")
+            .all()
+            .order_by("-fecha_inicio")
+        )
+        sucursal_usuario = obtener_sucursal_usuario(self.request.user)
+        if sucursal_usuario:
+            return qs.filter(colaborador__sucursal=sucursal_usuario)
+        return qs
 
 
 class PeriodoLiquidacionViewSet(AutenticadoModelViewSet):
-    queryset = (
-        PeriodoLiquidacion.objects.select_related("sucursal")
-        .all()
-        .order_by("-anio", "-mes")
-    )
     serializer_class = PeriodoLiquidacionSerializer
+
+    def get_queryset(self):
+        qs = (
+            PeriodoLiquidacion.objects.select_related("sucursal")
+            .all()
+            .order_by("-anio", "-mes")
+        )
+        sucursal_usuario = obtener_sucursal_usuario(self.request.user)
+        if sucursal_usuario:
+            return qs.filter(sucursal=sucursal_usuario)
+        return qs
 
 
 class TipoNovedadViewSet(
@@ -144,22 +169,42 @@ class NovedadViewSet(AutenticadoModelViewSet):
         "head",
         "options",
     ]
-    queryset = (
-        Novedad.objects.select_related(
-            "periodo",
-            "periodo__sucursal",
-            "colaborador",
-            "tipo_novedad",
-            "creado_por",
-            "validado_por",
-            "anulado_por",
-        )
-        .all()
-        .order_by("-creado_en")
-    )
     serializer_class = NovedadSerializer
 
+    def get_queryset(self):
+        qs = (
+            Novedad.objects.select_related(
+                "periodo",
+                "periodo__sucursal",
+                "colaborador",
+                "tipo_novedad",
+                "creado_por",
+                "validado_por",
+                "anulado_por",
+            )
+            .all()
+            .order_by("-creado_en")
+        )
+        sucursal_usuario = obtener_sucursal_usuario(self.request.user)
+        if sucursal_usuario:
+            return qs.filter(periodo__sucursal=sucursal_usuario)
+        return qs
+
     def perform_create(self, serializer):
+        sucursal_usuario = obtener_sucursal_usuario(self.request.user)
+        periodo = serializer.validated_data.get("periodo")
+        colaborador = serializer.validated_data.get("colaborador")
+
+        if sucursal_usuario:
+            if periodo and periodo.sucursal_id != sucursal_usuario.id:
+                raise ValidationError(
+                    {"periodo": "No tiene permisos para registrar novedades en otra sucursal."}
+                )
+            if colaborador and colaborador.sucursal_id != sucursal_usuario.id:
+                raise ValidationError(
+                    {"colaborador": "No tiene permisos para asociar colaboradores de otra sucursal."}
+                )
+
         serializer.save(
             creado_por=self.request.user,
             estado=Novedad.Estado.BORRADOR,
@@ -197,7 +242,6 @@ class NovedadViewSet(AutenticadoModelViewSet):
 
         return Response(self.get_serializer(novedad).data)
 
-
     @action(detail=True, methods=["post"])
     def anular(self, request, pk=None):
         novedad = self.get_object()
@@ -219,18 +263,22 @@ class NovedadViewSet(AutenticadoModelViewSet):
         return Response(self.get_serializer(novedad).data)
 
 
-
-
 class ExportacionViewSet(
     AutenticadoReadOnlyModelViewSet
 ):
-    queryset = (
-        Exportacion.objects.select_related(
-            "periodo",
-            "periodo__sucursal",
-            "generado_por",
-        )
-        .all()
-        .order_by("-fecha_generacion")
-    )
     serializer_class = ExportacionSerializer
+
+    def get_queryset(self):
+        qs = (
+            Exportacion.objects.select_related(
+                "periodo",
+                "periodo__sucursal",
+                "generado_por",
+            )
+            .all()
+            .order_by("-fecha_generacion")
+        )
+        sucursal_usuario = obtener_sucursal_usuario(self.request.user)
+        if sucursal_usuario:
+            return qs.filter(periodo__sucursal=sucursal_usuario)
+        return qs

@@ -17,36 +17,97 @@ from .models import (
     Exportacion,
     Novedad,
     PeriodoLiquidacion,
+    Sucursal,
 )
-from .permisos import puede_modificar_novedades
+from .permisos import (
+    cambiar_sucursal_activa,
+    es_usuario_operador_sucursal,
+    obtener_sucursal_activa,
+    obtener_sucursal_usuario,
+    puede_modificar_novedades,
+)
 
 
 def inicio(request):
     return render(request, "novedades/inicio.html")
 
+
+@never_cache
+@login_required
+def cambiar_sucursal(request):
+    """
+    Permite a usuarios globales (Admin / Contabilidad) alternar entre sucursales.
+    Los operadores asignados a una sucursal no pueden cambiar de sede.
+    """
+    if es_usuario_operador_sucursal(request.user):
+        messages.error(
+            request,
+            "Su usuario está asignado exclusivamente a una sucursal.",
+        )
+        return redirect("novedades:panel")
+
+    sucursal_id = request.POST.get("sucursal_id") or request.GET.get("sucursal_id")
+    if sucursal_id:
+        if cambiar_sucursal_activa(request, sucursal_id):
+            sucursal = Sucursal.objects.filter(pk=sucursal_id).first()
+            if sucursal:
+                messages.success(
+                    request,
+                    f"Sucursal activa cambiada a: {sucursal.nombre}",
+                )
+        else:
+            messages.error(request, "La sucursal seleccionada no es válida.")
+
+    next_url = (
+        request.POST.get("next")
+        or request.GET.get("next")
+        or request.META.get("HTTP_REFERER")
+        or "novedades:panel"
+    )
+    return redirect(next_url)
+
+
 @never_cache
 @login_required
 def panel(request):
+    sucursal_activa = obtener_sucursal_activa(request)
+
+    colaboradores_qs = Colaborador.objects.filter(activo=True)
+    periodos_qs = PeriodoLiquidacion.objects.filter(
+        estado=PeriodoLiquidacion.Estado.ABIERTO
+    )
+    novedades_borrador_qs = Novedad.objects.filter(
+        estado=Novedad.Estado.BORRADOR
+    )
+    novedades_validadas_qs = Novedad.objects.filter(
+        estado=Novedad.Estado.VALIDADA
+    )
+
+    if sucursal_activa:
+        colaboradores_qs = colaboradores_qs.filter(sucursal=sucursal_activa)
+        periodos_qs = periodos_qs.filter(sucursal=sucursal_activa)
+        novedades_borrador_qs = novedades_borrador_qs.filter(
+            periodo__sucursal=sucursal_activa
+        )
+        novedades_validadas_qs = novedades_validadas_qs.filter(
+            periodo__sucursal=sucursal_activa
+        )
+
     contexto = {
-        "colaboradores_activos": Colaborador.objects.filter(
-            activo=True
-        ).count(),
-        "periodos_abiertos": PeriodoLiquidacion.objects.filter(
-            estado=PeriodoLiquidacion.Estado.ABIERTO
-        ).count(),
-        "novedades_borrador": Novedad.objects.filter(
-            estado=Novedad.Estado.BORRADOR
-        ).count(),
-        "novedades_validadas": Novedad.objects.filter(
-            estado=Novedad.Estado.VALIDADA
-        ).count(),
+        "sucursal_activa": sucursal_activa,
+        "colaboradores_activos": colaboradores_qs.count(),
+        "periodos_abiertos": periodos_qs.count(),
+        "novedades_borrador": novedades_borrador_qs.count(),
+        "novedades_validadas": novedades_validadas_qs.count(),
     }
 
     return render(request, "novedades/panel.html", contexto)
 
+
 @never_cache
 @login_required
 def lista_novedades(request):
+    sucursal_activa = obtener_sucursal_activa(request)
     registros = Novedad.objects.select_related(
         "periodo",
         "periodo__sucursal",
@@ -55,6 +116,9 @@ def lista_novedades(request):
         "creado_por",
         "validado_por",
     )
+
+    if sucursal_activa:
+        registros = registros.filter(periodo__sucursal=sucursal_activa)
 
     busqueda = request.GET.get("q", "").strip()
     estado_seleccionado = request.GET.get("estado", "").strip()
@@ -83,10 +147,11 @@ def lista_novedades(request):
     paginador = Paginator(registros, 15)
     pagina = paginador.get_page(request.GET.get("pagina"))
 
-    periodos = (
-        PeriodoLiquidacion.objects.select_related("sucursal")
-        .order_by("-anio", "-mes", "sucursal__nombre")
-    )
+    periodos_qs = PeriodoLiquidacion.objects.select_related("sucursal")
+    if sucursal_activa:
+        periodos_qs = periodos_qs.filter(sucursal=sucursal_activa)
+
+    periodos = periodos_qs.order_by("-anio", "-mes", "sucursal__nombre")
 
     contexto = {
         "pagina": pagina,
@@ -95,6 +160,7 @@ def lista_novedades(request):
         "busqueda": busqueda,
         "estado_seleccionado": estado_seleccionado,
         "periodo_seleccionado": periodo_seleccionado,
+        "sucursal_activa": sucursal_activa,
     }
 
     return render(
@@ -102,6 +168,7 @@ def lista_novedades(request):
         "novedades/lista_novedades.html",
         contexto,
     )
+
 
 @never_cache
 @login_required
@@ -116,11 +183,21 @@ def crear_novedad(request):
         )
         return redirect("novedades:lista_novedades")
 
+    sucursal_activa = obtener_sucursal_activa(request)
+
     if request.method == "POST":
-        formulario = NovedadForm(request.POST)
+        formulario = NovedadForm(request.POST, sucursal=sucursal_activa)
 
         if formulario.is_valid():
             novedad = formulario.save(commit=False)
+            sucursal_usuario = obtener_sucursal_usuario(request.user)
+            if sucursal_usuario and novedad.periodo.sucursal_id != sucursal_usuario.id:
+                messages.error(
+                    request,
+                    "No tiene permisos para registrar novedades en otra sucursal.",
+                )
+                return redirect("novedades:lista_novedades")
+
             novedad.creado_por = request.user
             novedad.estado = Novedad.Estado.BORRADOR
             novedad.save()
@@ -132,10 +209,11 @@ def crear_novedad(request):
 
             return redirect("novedades:lista_novedades")
     else:
-        formulario = NovedadForm()
+        formulario = NovedadForm(sucursal=sucursal_activa)
 
     contexto = {
         "formulario": formulario,
+        "sucursal_activa": sucursal_activa,
     }
 
     return render(
@@ -143,6 +221,7 @@ def crear_novedad(request):
         "novedades/crear_novedad.html",
         contexto,
     )
+
 
 @never_cache
 @login_required
@@ -154,6 +233,11 @@ def editar_novedad(request, pk):
         )
         return redirect("novedades:lista_novedades")
 
+    sucursal_usuario = obtener_sucursal_usuario(request.user)
+    filtro = {"pk": pk}
+    if sucursal_usuario:
+        filtro["periodo__sucursal"] = sucursal_usuario
+
     novedad = get_object_or_404(
         Novedad.objects.select_related(
             "periodo",
@@ -161,7 +245,7 @@ def editar_novedad(request, pk):
             "colaborador",
             "tipo_novedad",
         ),
-        pk=pk,
+        **filtro,
     )
 
     if not novedad.puede_editar:
@@ -174,10 +258,13 @@ def editar_novedad(request, pk):
         )
         return redirect("novedades:lista_novedades")
 
+    sucursal_activa = novedad.periodo.sucursal
+
     if request.method == "POST":
         formulario = NovedadForm(
             request.POST,
             instance=novedad,
+            sucursal=sucursal_activa,
         )
 
         if formulario.is_valid():
@@ -190,12 +277,13 @@ def editar_novedad(request, pk):
 
             return redirect("novedades:lista_novedades")
     else:
-        formulario = NovedadForm(instance=novedad)
+        formulario = NovedadForm(instance=novedad, sucursal=sucursal_activa)
 
     contexto = {
         "formulario": formulario,
         "novedad": novedad,
         "modo_edicion": True,
+        "sucursal_activa": sucursal_activa,
     }
 
     return render(
@@ -203,6 +291,7 @@ def editar_novedad(request, pk):
         "novedades/crear_novedad.html",
         contexto,
     )
+
 
 @never_cache
 @login_required
@@ -215,12 +304,17 @@ def validar_novedad(request, pk):
         )
         return redirect("novedades:lista_novedades")
 
+    sucursal_usuario = obtener_sucursal_usuario(request.user)
+    filtro = {"pk": pk}
+    if sucursal_usuario:
+        filtro["periodo__sucursal"] = sucursal_usuario
+
     novedad = get_object_or_404(
         Novedad.objects.select_related(
             "periodo",
             "periodo__sucursal",
         ),
-        pk=pk,
+        **filtro,
     )
 
     try:
@@ -238,6 +332,7 @@ def validar_novedad(request, pk):
 
     return redirect("novedades:lista_novedades")
 
+
 @never_cache
 @login_required
 def anular_novedad(request, pk):
@@ -248,6 +343,11 @@ def anular_novedad(request, pk):
         )
         return redirect("novedades:lista_novedades")
 
+    sucursal_usuario = obtener_sucursal_usuario(request.user)
+    filtro = {"pk": pk}
+    if sucursal_usuario:
+        filtro["periodo__sucursal"] = sucursal_usuario
+
     novedad = get_object_or_404(
         Novedad.objects.select_related(
             "periodo",
@@ -255,7 +355,7 @@ def anular_novedad(request, pk):
             "colaborador",
             "tipo_novedad",
         ),
-        pk=pk,
+        **filtro,
     )
 
     if not novedad.puede_anular:
@@ -291,6 +391,7 @@ def anular_novedad(request, pk):
     contexto = {
         "formulario": formulario,
         "novedad": novedad,
+        "sucursal_activa": novedad.periodo.sucursal,
     }
 
     return render(
@@ -299,20 +400,28 @@ def anular_novedad(request, pk):
         contexto,
     )
 
+
 @never_cache
 @login_required
 def exportar_novedades(request):
-    exportaciones_recientes = (
-        Exportacion.objects.select_related(
-            "periodo",
-            "periodo__sucursal",
-            "generado_por",
-        )
-        .order_by("-fecha_generacion")[:10]
+    sucursal_activa = obtener_sucursal_activa(request)
+    exportaciones_qs = Exportacion.objects.select_related(
+        "periodo",
+        "periodo__sucursal",
+        "generado_por",
     )
 
+    if sucursal_activa:
+        exportaciones_qs = exportaciones_qs.filter(
+            periodo__sucursal=sucursal_activa
+        )
+
+    exportaciones_recientes = exportaciones_qs.order_by(
+        "-fecha_generacion"
+    )[:10]
+
     if request.method == "POST":
-        formulario = ExportacionForm(request.POST)
+        formulario = ExportacionForm(request.POST, sucursal=sucursal_activa)
 
         if formulario.is_valid():
             with transaction.atomic():
@@ -323,6 +432,14 @@ def exportar_novedades(request):
                         pk=formulario.cleaned_data["periodo"].pk
                     )
                 )
+
+                sucursal_usuario = obtener_sucursal_usuario(request.user)
+                if sucursal_usuario and periodo.sucursal_id != sucursal_usuario.id:
+                    messages.error(
+                        request,
+                        "No tiene permisos para exportar datos de otra sucursal.",
+                    )
+                    return redirect("novedades:exportar_novedades")
 
                 list(
                     Novedad.objects.select_for_update()
@@ -423,15 +540,16 @@ def exportar_novedades(request):
 
                     return respuesta
     else:
-        formulario = ExportacionForm()
+        formulario = ExportacionForm(sucursal=sucursal_activa)
 
     contexto = {
         "formulario": formulario,
         "exportaciones_recientes": exportaciones_recientes,
+        "sucursal_activa": sucursal_activa,
     }
 
     return render(
         request,
         "novedades/exportar_novedades.html",
         contexto,
-    )
+    )

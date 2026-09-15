@@ -227,16 +227,52 @@
 
                         <div class="min-w-0">
                             <p class="text-xs font-bold uppercase tracking-[0.18em] text-emerald-700">
-                                Sistema interno
+                                {% if es_usuario_sucursal %}Sucursal asignada{% else %}Sucursal activa{% endif %}
                             </p>
 
-                            <p class="truncate font-bold text-slate-950">
-                                Alimentos Rancagua SpA
+                            <p class="truncate font-black text-slate-950 text-base sm:text-lg">
+                                {{ nombre_sucursal_activa }}
                             </p>
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="flex items-center gap-2 sm:gap-4">
+                        {% if puede_cambiar_sucursal %}
+                            <form
+                                method="post"
+                                action="{% url 'novedades:cambiar_sucursal' %}"
+                                class="flex items-center gap-1.5"
+                                title="Cambiar sucursal activa"
+                            >
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                <label for="header_sucursal_select" class="hidden sm:inline text-xs font-bold text-slate-500">
+                                    Sede:
+                                </label>
+                                <select
+                                    id="header_sucursal_select"
+                                    name="sucursal_id"
+                                    onchange="this.form.submit()"
+                                    class="rounded-xl border border-slate-300 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-900 shadow-sm outline-none transition hover:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 cursor-pointer"
+                                >
+                                    {% for suc in sucursales_disponibles %}
+                                        <option
+                                            value="{{ suc.pk }}"
+                                            {% if sucursal_activa and sucursal_activa.pk == suc.pk %}selected{% endif %}
+                                        >
+                                            🏢 {{ suc.nombre }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </form>
+                        {% elif es_usuario_sucursal %}
+                            <span
+                                class="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-800"
+                            >
+                                🔒 Modo Sucursal
+                            </span>
+                        {% endif %}
+
                         <div class="hidden text-right sm:block">
                             <p class="text-sm font-bold text-slate-900">
                                 {% firstof request.user.get_full_name request.user.username %}
@@ -277,6 +313,7 @@
                         </form>
                     </div>
                 </div>
+
 
                                 <nav
                     aria-label="Navegación móvil"

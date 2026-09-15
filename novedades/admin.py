@@ -1,4 +1,7 @@
 from django.contrib import admin
+from django.contrib.auth import get_user_model
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+
 
 from .models import (
     AFP,
@@ -8,12 +11,14 @@ from .models import (
     Exportacion,
     InstitucionSalud,
     Novedad,
+    PerfilUsuario,
     PeriodoLiquidacion,
     Sucursal,
     TipoNovedad,
 )
+from .permisos import es_usuario_contabilidad, obtener_sucursal_usuario
 
-from .permisos import es_usuario_contabilidad
+User = get_user_model()
 
 
 class RestriccionContabilidadAdminMixin:
@@ -36,6 +41,70 @@ class RestriccionContabilidadAdminMixin:
 class SinEliminacionAdminMixin(RestriccionContabilidadAdminMixin):
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+class AislamientoSucursalAdminMixin:
+    """
+    Filtra los registros en el panel de administración para que los operadores
+    de sucursal solo visualicen y gestionen los datos pertenecientes a su sede.
+    """
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        sucursal_usuario = obtener_sucursal_usuario(request.user)
+        if sucursal_usuario:
+            if hasattr(self.model, "sucursal"):
+                return qs.filter(sucursal=sucursal_usuario)
+            elif hasattr(self.model, "periodo"):
+                return qs.filter(periodo__sucursal=sucursal_usuario)
+            elif hasattr(self.model, "colaborador"):
+                return qs.filter(colaborador__sucursal=sucursal_usuario)
+        return qs
+
+
+class PerfilUsuarioInline(admin.StackedInline):
+    model = PerfilUsuario
+    can_delete = False
+    verbose_name_plural = "Perfil y Sucursal asignada"
+    fk_name = "user"
+
+
+try:
+    admin.site.unregister(User)
+except admin.sites.NotRegistered:
+    pass
+
+
+@admin.register(User)
+class UsuarioAdmin(BaseUserAdmin):
+    inlines = (PerfilUsuarioInline,)
+
+    def has_add_permission(self, request):
+        return request.user.is_superuser
+
+    def has_change_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+    def has_module_permission(self, request):
+        return request.user.is_superuser
+
+
+@admin.register(PerfilUsuario)
+class PerfilUsuarioAdmin(admin.ModelAdmin):
+    list_display = ("user", "sucursal")
+    list_filter = ("sucursal",)
+    search_fields = (
+        "user__username",
+        "user__first_name",
+        "user__last_name",
+        "user__email",
+    )
+
+    def has_module_permission(self, request):
+        return request.user.is_superuser
+
 
 
 @admin.register(Sucursal)
@@ -83,7 +152,11 @@ class InstitucionSaludAdmin(
 
 
 @admin.register(Colaborador)
-class ColaboradorAdmin(RestriccionContabilidadAdminMixin, admin.ModelAdmin):
+class ColaboradorAdmin(
+    AislamientoSucursalAdminMixin,
+    RestriccionContabilidadAdminMixin,
+    admin.ModelAdmin,
+):
     list_display = (
         "rut",
         "apellidos",
@@ -102,7 +175,11 @@ class ColaboradorAdmin(RestriccionContabilidadAdminMixin, admin.ModelAdmin):
 
 
 @admin.register(Contrato)
-class ContratoAdmin(RestriccionContabilidadAdminMixin, admin.ModelAdmin):
+class ContratoAdmin(
+    AislamientoSucursalAdminMixin,
+    RestriccionContabilidadAdminMixin,
+    admin.ModelAdmin,
+):
     list_display = (
         "colaborador",
         "tipo_contrato",
@@ -124,7 +201,9 @@ class ContratoAdmin(RestriccionContabilidadAdminMixin, admin.ModelAdmin):
 
 @admin.register(PeriodoLiquidacion)
 class PeriodoLiquidacionAdmin(
-    RestriccionContabilidadAdminMixin, admin.ModelAdmin
+    AislamientoSucursalAdminMixin,
+    RestriccionContabilidadAdminMixin,
+    admin.ModelAdmin,
 ):
     list_display = (
         "sucursal",
@@ -159,6 +238,7 @@ class TipoNovedadAdmin(
 
 @admin.register(Novedad)
 class NovedadAdmin(
+    AislamientoSucursalAdminMixin,
     SinEliminacionAdminMixin,
     admin.ModelAdmin,
 ):
@@ -197,7 +277,10 @@ class NovedadAdmin(
 
 
 @admin.register(Exportacion)
-class ExportacionAdmin(admin.ModelAdmin):
+class ExportacionAdmin(
+    AislamientoSucursalAdminMixin,
+    admin.ModelAdmin,
+):
     list_display = (
         "nombre_archivo",
         "periodo",
@@ -210,4 +293,4 @@ class ExportacionAdmin(admin.ModelAdmin):
     list_filter = ("formato", "periodo")
     ordering = ("-fecha_generacion",)
     date_hierarchy = "fecha_generacion"
-    readonly_fields = ("fecha_generacion",)
+    readonly_fields = ("fecha_generacion",)

@@ -33,9 +33,14 @@ urlpatterns = [
         name="anular_novedad",
     ),
 
-        path(
+    path(
         "exportaciones/",
         views.exportar_novedades,
         name="exportar_novedades",
     ),
-]
+    path(
+        "cambiar-sucursal/",
+        views.cambiar_sucursal,
+        name="cambiar_sucursal",
+    ),
+]

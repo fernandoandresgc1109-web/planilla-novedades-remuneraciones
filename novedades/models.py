@@ -24,6 +24,40 @@ class Sucursal(models.Model):
         return f"{self.codigo} - {self.nombre}"
 
 
+class PerfilUsuario(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="perfil",
+        verbose_name="usuario",
+    )
+    sucursal = models.ForeignKey(
+        Sucursal,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="usuarios_asignados",
+        verbose_name="sucursal asignada",
+        help_text=(
+            "Si se asigna una sucursal, el usuario operará exclusivamente "
+            "en dicha sucursal. Dejar en blanco para usuarios con acceso global "
+            "(Administrador general o Contabilidad)."
+        ),
+    )
+
+    class Meta:
+        verbose_name = "perfil de usuario"
+        verbose_name_plural = "perfiles de usuario"
+
+    def __str__(self):
+        sucursal_str = (
+            self.sucursal.nombre
+            if self.sucursal
+            else "Global (Todas las sucursales)"
+        )
+        return f"{self.user.username} - {sucursal_str}"
+
+
 class Banco(models.Model):
     codigo = models.CharField(max_length=20, unique=True)
     nombre = models.CharField(max_length=100, unique=True)
@@ -482,3 +516,24 @@ class Exportacion(models.Model):
 
     def __str__(self):
         return self.nombre_archivo
+
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def asegurar_perfil_usuario(sender, instance, created, **kwargs):
+    """
+    Garantiza que todo usuario del sistema tenga una instancia de PerfilUsuario asociada.
+    """
+    if created:
+        PerfilUsuario.objects.get_or_create(user=instance)
+    else:
+        try:
+            if hasattr(instance, "perfil") and instance.perfil:
+                instance.perfil.save()
+            else:
+                PerfilUsuario.objects.get_or_create(user=instance)
+        except Exception:
+            PerfilUsuario.objects.get_or_create(user=instance)
