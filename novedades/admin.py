@@ -66,6 +66,7 @@ class PerfilUsuarioInline(admin.StackedInline):
     can_delete = False
     verbose_name_plural = "Perfil y Sucursal asignada"
     fk_name = "user"
+    extra = 0
 
 
 try:
@@ -78,6 +79,11 @@ except admin.sites.NotRegistered:
 class UsuarioAdmin(BaseUserAdmin):
     inlines = (PerfilUsuarioInline,)
 
+    def get_inline_instances(self, request, obj=None):
+        if not obj:
+            return []
+        return super().get_inline_instances(request, obj)
+
     def has_add_permission(self, request):
         return request.user.is_superuser
 
@@ -89,6 +95,7 @@ class UsuarioAdmin(BaseUserAdmin):
 
     def has_module_permission(self, request):
         return request.user.is_superuser
+
 
 
 @admin.register(PerfilUsuario)

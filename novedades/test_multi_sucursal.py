@@ -400,3 +400,49 @@ class MultiSucursalIsolationTests(TestCase):
             },
         )
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    # -------------------------------------------------------------
+    # 6. DJANGO ADMIN: CREACIÓN DE USUARIOS Y ASIGNACIÓN DE SUCURSAL
+    # -------------------------------------------------------------
+    def test_admin_crear_usuario_en_django_admin(self):
+        self.client.force_login(self.admin_global)
+
+        # 1. Acceder a la página de agregar usuario
+        res_get = self.client.get(reverse("admin:auth_user_add"))
+        self.assertEqual(res_get.status_code, 200)
+
+        # 2. Crear el usuario puente_alto
+        res_post = self.client.post(
+            reverse("admin:auth_user_add"),
+            {
+                "username": "puente_alto",
+                "password1": "ClaveSegura2026!",
+                "password2": "ClaveSegura2026!",
+            },
+        )
+        self.assertEqual(res_post.status_code, 302)
+
+
+        usuario_creado = User.objects.get(username="puente_alto")
+        self.assertTrue(hasattr(usuario_creado, "perfil"))
+
+        # 3. Acceder a la pantalla de edición del usuario y verificar que carga exitosamente (status 200)
+        res_change_get = self.client.get(
+            reverse("admin:auth_user_change", args=[usuario_creado.pk])
+        )
+        self.assertEqual(res_change_get.status_code, 200)
+
+        # 4. Asignar la sucursal Pedregal mediante el admin de PerfilUsuario
+        res_perfil_post = self.client.post(
+            reverse("admin:novedades_perfilusuario_change", args=[usuario_creado.perfil.pk]),
+            {
+                "user": str(usuario_creado.pk),
+                "sucursal": str(self.sucursal_pedregal.pk),
+            },
+        )
+        self.assertEqual(res_perfil_post.status_code, 302)
+
+        usuario_creado.refresh_from_db()
+        self.assertEqual(usuario_creado.perfil.sucursal, self.sucursal_pedregal)
+
+
