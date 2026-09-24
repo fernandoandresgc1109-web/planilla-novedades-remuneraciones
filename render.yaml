@@ -1,11 +1,3 @@
-databases:
-  - name: planilla-novedades-db
-    databaseName: planilla_novedades
-    user: planilla_app
-    plan: free
-    region: virginia
-    postgresMajorVersion: "18"
-
 services:
   - type: web
     name: planilla-novedades-remuneraciones
@@ -19,9 +11,7 @@ services:
     initialDeployHook: python manage.py createsuperuser --no-input
     envVars:
       - key: DATABASE_URL
-        fromDatabase:
-          name: planilla-novedades-db
-          property: connectionString
+        sync: false
       - key: DJANGO_SECRET_KEY
         generateValue: true
       - key: DJANGO_DEBUG
