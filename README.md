@@ -118,7 +118,7 @@ python manage.py reset_clave PEDREGAL_PUENTE_ALTO --password "ClaveSegura2026!"
 | Control de versiones | Git |
 | Repositorio | GitHub |
 | Servidor de producción | Render |
-| Base de datos administrada | PostgreSQL 18 en Render |
+| Base de datos administrada | Neon PostgreSQL 18 |
 | Metodología | Agile / Scrum Web |
 
 ## Arquitectura inicial
@@ -148,10 +148,10 @@ La comunicación utiliza HTTPS; las cookies de sesión y CSRF son seguras; las c
 |---|---|---|---:|
 | Subdominio `onrender.com` | Render | Incluido | USD 0 |
 | Servicio web | Render Free | Mensual | USD 0 |
-| Base de datos PostgreSQL | Render Free | 30 días | USD 0 |
+| Base de datos PostgreSQL | Neon Free | Mensual | USD 0 |
 | *Total de la demostración* |  |  | *USD 0* |
 
-El servicio web gratuito puede suspenderse por inactividad y tardar en responder la primera vez. La base de datos gratuita utilizada para la demostración expira el 28 de septiembre de 2026.
+El servicio web gratuito de Render se suspende por inactividad y puede tardar en responder la primera vez. La base de datos utiliza Neon Free, cuyo cómputo escala a cero cuando no hay actividad y está sujeto a los límites mensuales del plan, sin la expiración fija de 30 días de Render Postgres.
 
 ## Metodología de trabajo
 
@@ -176,7 +176,7 @@ Cada jornada de trabajo finalizará con:
 - [Gestión de estados de las novedades](docs/gestion-estados-novedades.md): documenta la edición, validación, anulación, auditoría, transiciones permitidas, protección de la API y pruebas automáticas.
 - [Exportación de novedades](docs/exportacion-novedades.md): explica la generación de archivos CSV y Excel, reglas de exportación, auditoría, seguridad, reexportación y pruebas automáticas.
 - [Pruebas funcionales y de seguridad](docs/pruebas-funcionales-seguridad.md): registra las pruebas automáticas y manuales, verificaciones de exportación, auditorías de seguridad, configuración para producción y resultados obtenidos.
-- [Despliegue en Render](docs/despliegue-render.md): documenta la infraestructura, configuración, verificaciones en producción, Lighthouse y limitaciones del plan gratuito.
+- [Despliegue en Render y Neon](docs/despliegue-render.md): documenta la infraestructura, configuración, migración de la base de datos, verificaciones en producción, Lighthouse y limitaciones de los planes gratuitos.
 
 Los archivos reales utilizados para analizar el proceso no se incluyen en el repositorio porque contienen información personal, bancaria, previsional y salarial.
 
@@ -217,6 +217,7 @@ Los archivos reales utilizados para analizar el proceso no se incluyen en el rep
 | 28-08-2026 | Pruebas funcionales y de seguridad | Se realizaron 30 comprobaciones funcionales manuales en escritorio y dispositivos móviles; se reforzaron la autenticación, la protección de sesiones, la API REST, la administración y las reglas de eliminación; se verificaron las exportaciones CSV y Excel; se actualizaron las configuraciones para producción y la dependencia `sqlparse`; las auditorías de dependencias y código no encontraron vulnerabilidades, y se ejecutaron correctamente 72 pruebas automáticas. |
 | 29-08-2026 | Preparación del despliegue en Render | Se incorporaron Gunicorn, WhiteNoise, el script de construcción, la configuración segura y el Blueprint; los cambios se integraron en `main` mediante el pull request 10. |
 | 30-08-2026 | Despliegue y verificación en producción | Se verificaron la landing, autenticación, panel, API REST, datos ficticios y exportación Excel. Lighthouse móvil obtuvo 100 en rendimiento, 95 en accesibilidad, 100 en buenas prácticas y 100 en SEO. |
+| 24-09-2026 | Migración de PostgreSQL de Render a Neon | Se generó y validó un respaldo en formato personalizado, se restauraron 21 tablas en Neon PostgreSQL 18, se verificaron los registros, se configuró conexión agrupada mediante una variable de entorno y se confirmó el despliegue operativo en Render. El cambio se integró mediante el pull request 13. |
 
 ## Consideraciones de privacidad
 
