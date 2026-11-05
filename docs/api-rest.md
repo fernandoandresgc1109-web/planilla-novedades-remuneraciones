@@ -14,19 +14,34 @@ Durante el desarrollo local, la API se encuentra disponible en:
 http://127.0.0.1:8000/api/
 ```
 
-El inicio de sesión para la interfaz navegable se encuentra en:
+El inicio de sesión de la aplicación web se encuentra en:
 
 ```text
-http://127.0.0.1:8000/api-auth/login/
+http://127.0.0.1:8000/cuentas/login/
 ```
 
 ## 3. Autenticación y permisos
 
-La API utiliza autenticación por sesión de Django.
+La API admite dos mecanismos de autenticación:
 
-Todas las rutas están protegidas mediante el permiso `IsAuthenticated`. Por lo tanto, un usuario no autenticado no puede consultar, crear, modificar ni eliminar registros.
+- **Sesión de Django:** utilizada por la interfaz web y la API navegable.
+- **Token:** utilizado por la aplicación móvil Android.
 
-En esta primera versión, todo usuario autenticado puede utilizar las operaciones disponibles. Los permisos diferenciados por cargo o grupo se implementarán posteriormente.
+El cliente móvil obtiene el token enviando el usuario y la contraseña a:
+
+```text
+POST /api/autenticacion/iniciar/
+```
+
+Las solicitudes posteriores deben incluir el encabezado:
+
+```text
+Authorization: Token TOKEN_DEL_USUARIO
+```
+
+Todas las rutas están protegidas mediante el permiso `IsAuthenticated`. Una solicitud sin autenticación recibe el estado HTTP `401 Unauthorized`.
+
+Los permisos y el aislamiento se aplican en el servidor: el operador solo accede a su sucursal, Contabilidad tiene acceso global de solo lectura y exportación, y el superadministrador puede gestionar todas las sucursales.
 
 ## 4. Recursos disponibles
 
@@ -42,6 +57,14 @@ En esta primera versión, todo usuario autenticado puede utilizar las operacione
 | Tipos de novedad | `/api/tipos-novedad/` |
 | Novedades | `/api/novedades/` |
 | Exportaciones | `/api/exportaciones/` |
+
+### Autenticación móvil
+
+| Operación | Ruta |
+|---|---|
+| Iniciar sesión y obtener token | `POST /api/autenticacion/iniciar/` |
+| Consultar usuario, rol, sucursal y permisos | `GET /api/autenticacion/usuario/` |
+| Cerrar sesión e invalidar token | `POST /api/autenticacion/cerrar/` |
 
 La consulta de un registro específico utiliza su identificador:
 
