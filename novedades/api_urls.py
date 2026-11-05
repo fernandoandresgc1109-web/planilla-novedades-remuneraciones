@@ -1,5 +1,11 @@
+from django.urls import path
 from rest_framework.routers import DefaultRouter
 
+from .api_auth import (
+    CerrarSesionMovilAPIView,
+    InicioSesionMovilAPIView,
+    UsuarioActualMovilAPIView,
+)
 from .api_views import (
     AFPViewSet,
     BancoViewSet,
@@ -47,4 +53,21 @@ router.register(
     basename="exportacion",
 )
 
-urlpatterns = router.urls
+urlpatterns = [
+    path(
+        "autenticacion/iniciar/",
+        InicioSesionMovilAPIView.as_view(),
+        name="autenticacion-iniciar",
+    ),
+    path(
+        "autenticacion/usuario/",
+        UsuarioActualMovilAPIView.as_view(),
+        name="autenticacion-usuario",
+    ),
+    path(
+        "autenticacion/cerrar/",
+        CerrarSesionMovilAPIView.as_view(),
+        name="autenticacion-cerrar",
+    ),
+]
+urlpatterns += router.urls

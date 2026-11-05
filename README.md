@@ -4,7 +4,7 @@
 
 ## Estado del proyecto
 
-Fase actual: aplicación desplegada y verificada en Render; preparación de la presentación y entrega final.
+Fase actual: aplicación web desplegada y verificada; adaptación como aplicación móvil Android para la asignatura Diseño de Aplicaciones para Móviles.
 
 Aplicación desplegada: [planilla-novedades-remuneraciones.onrender.com](https://planilla-novedades-remuneraciones.onrender.com/)
 
@@ -134,6 +134,12 @@ La aplicación utilizará una arquitectura web Full-Stack:
 7. GitHub conservará el código y la documentación.
 8. El servicio cloud permitirá el acceso a la aplicación desplegada.
 
+## Extensión móvil Android
+
+La aplicación web se conservará como sistema central y panel administrativo. La nueva aplicación Android consumirá la misma API REST y utilizará la base de datos PostgreSQL existente. De esta manera se reutilizan las reglas de negocio, los roles y el aislamiento multisucursal.
+
+La primera etapa incorpora autenticación por token para Android, consulta del usuario activo y cierre de sesión móvil. La autenticación por sesión de la interfaz web se mantiene sin cambios.
+
 ## Seguridad implementada
 
 La aplicación utiliza autenticación mediante sesiones seguras de Django y permisos para usuarios autenticados.
@@ -177,6 +183,7 @@ Cada jornada de trabajo finalizará con:
 - [Exportación de novedades](docs/exportacion-novedades.md): explica la generación de archivos CSV y Excel, reglas de exportación, auditoría, seguridad, reexportación y pruebas automáticas.
 - [Pruebas funcionales y de seguridad](docs/pruebas-funcionales-seguridad.md): registra las pruebas automáticas y manuales, verificaciones de exportación, auditorías de seguridad, configuración para producción y resultados obtenidos.
 - [Despliegue en Render y Neon](docs/despliegue-render.md): documenta la infraestructura, configuración, migración de la base de datos, verificaciones en producción, Lighthouse y limitaciones de los planes gratuitos.
+- [Adaptación de la aplicación para Android](docs/adaptacion-aplicacion-movil.md): explica la arquitectura móvil, la autenticación por token, las medidas de seguridad, las pruebas y las próximas etapas.
 
 Los archivos reales utilizados para analizar el proceso no se incluyen en el repositorio porque contienen información personal, bancaria, previsional y salarial.
 
@@ -197,6 +204,10 @@ Los archivos reales utilizados para analizar el proceso no se incluyen en el rep
 - [x] Implementación de las exportaciones.
 - [x] Pruebas funcionales y de seguridad.
 - [x] Despliegue en la nube.
+- [x] Preparación de la autenticación de la API para el cliente Android.
+- [ ] Creación del proyecto Android con Kotlin y Jetpack Compose.
+- [ ] Integración de Android con la API REST.
+- [ ] Pruebas y demostración de la aplicación móvil.
 - [ ] Presentación y entrega final.
 
 ## Bitácora de desarrollo
@@ -218,6 +229,7 @@ Los archivos reales utilizados para analizar el proceso no se incluyen en el rep
 | 29-08-2026 | Preparación del despliegue en Render | Se incorporaron Gunicorn, WhiteNoise, el script de construcción, la configuración segura y el Blueprint; los cambios se integraron en `main` mediante el pull request 10. |
 | 30-08-2026 | Despliegue y verificación en producción | Se verificaron la landing, autenticación, panel, API REST, datos ficticios y exportación Excel. Lighthouse móvil obtuvo 100 en rendimiento, 95 en accesibilidad, 100 en buenas prácticas y 100 en SEO. |
 | 24-09-2026 | Migración de PostgreSQL de Render a Neon | Se generó y validó un respaldo en formato personalizado, se restauraron 21 tablas en Neon PostgreSQL 18, se verificaron los registros, se configuró conexión agrupada mediante una variable de entorno y se confirmó el despliegue operativo en Render. El cambio se integró mediante el pull request 13. |
+| 05-11-2026 | Inicio de la adaptación móvil | Se preparó la API para autenticar clientes Android mediante token, consultar el usuario y sus permisos e invalidar el acceso al cerrar sesión; se conservaron las sesiones de la interfaz web y el aislamiento multisucursal. |
 
 ## Consideraciones de privacidad
 

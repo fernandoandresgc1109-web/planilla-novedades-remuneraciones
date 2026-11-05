@@ -67,7 +67,7 @@ class ApiRestTests(APITestCase):
 
         self.assertEqual(
             respuesta.status_code,
-            status.HTTP_403_FORBIDDEN,
+            status.HTTP_401_UNAUTHORIZED,
         )
 
     def test_api_root_muestra_diez_endpoints(self):
