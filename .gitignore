@@ -221,3 +221,12 @@ __marimo__/
 node_modules/
 # Django collected static files
 staticfiles/
+
+# Android
+mobile/.gradle/
+mobile/.idea/
+mobile/.kotlin/
+mobile/local.properties
+mobile/**/build/
+mobile/captures/
+mobile/*.iml

@@ -1,0 +1,42 @@
+name: Verificar Android
+
+on:
+  pull_request:
+    paths:
+      - "mobile/**"
+      - ".github/workflows/android.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "mobile/**"
+      - ".github/workflows/android.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Pruebas y compilación
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v7
+
+      - name: Configurar Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Configurar Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Instalar plataforma Android
+        run: sdkmanager "platforms;android-36" "build-tools;35.0.0"
+
+      - name: Ejecutar pruebas y compilar APK
+        working-directory: mobile
+        run: ./gradlew testDebugUnitTest assembleDebug --stacktrace

@@ -68,10 +68,39 @@ La etapa incorpora pruebas para comprobar:
 
 ## 7. Próximas etapas
 
-- Crear el proyecto Android con Kotlin y Jetpack Compose.
-- Implementar la pantalla de inicio de sesión.
-- Conectar Android con las rutas de autenticación.
-- Crear el panel y los listados móviles.
+- Crear los listados móviles de períodos, colaboradores y novedades.
+- Incorporar navegación entre las funciones móviles.
 - Permitir el registro de novedades según el rol.
 - Incorporar pruebas de la aplicación Android.
 - Actualizar el README y preparar las evidencias de la entrega.
+
+## 8. Segunda etapa: cliente Android inicial
+
+El proyecto nativo se encuentra en la carpeta `mobile` y utiliza Kotlin con Jetpack Compose. La primera pantalla permite iniciar sesión con las mismas credenciales de la aplicación web.
+
+Después de una autenticación correcta, el cliente:
+
+1. Guarda el token cifrado en el dispositivo.
+2. Agrega el encabezado `Authorization` a las solicitudes protegidas.
+3. Recupera la sesión cuando se vuelve a abrir la aplicación.
+4. Muestra el usuario, el rol, la sucursal y los permisos entregados por Django.
+5. Elimina el token local y el token del servidor al cerrar sesión.
+
+La aplicación solo permite conexiones HTTPS y no contiene contraseñas, credenciales de base de datos ni llaves privadas en el código.
+
+GitHub Actions ejecuta automáticamente las pruebas unitarias y la compilación del APK cuando se propone un cambio en la aplicación móvil.
+
+### Estructura principal
+
+| Carpeta o archivo | Responsabilidad |
+|---|---|
+| `data/model` | Representa los datos recibidos desde Django. |
+| `data/remote` | Define las rutas de la API y agrega el token. |
+| `data/repository` | Coordina el inicio, recuperación y cierre de sesión. |
+| `data/session` | Guarda el token cifrado. |
+| `ui/auth` | Mantiene el estado de autenticación. |
+| `ui/PlanillaApp.kt` | Presenta las pantallas de acceso y bienvenida. |
+
+### Explicación para la sustentación
+
+> Primero preparé Django para aceptar tokens y después construí un cliente Android nativo. La aplicación móvil envía las credenciales por HTTPS, recibe un token y lo guarda cifrado. En cada solicitud, Django identifica al usuario y aplica las reglas de rol y sucursal. Por eso la seguridad sigue centralizada en el servidor y no depende únicamente del teléfono.
