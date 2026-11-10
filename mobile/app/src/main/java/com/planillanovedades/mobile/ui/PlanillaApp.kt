@@ -1,9 +1,11 @@
 package com.planillanovedades.mobile.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AssistChip
@@ -22,9 +26,11 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -35,16 +41,29 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.planillanovedades.mobile.data.model.ColaboradorMovil
 import com.planillanovedades.mobile.data.model.UsuarioMovil
 import com.planillanovedades.mobile.ui.auth.AuthUiState
+import com.planillanovedades.mobile.ui.colaboradores.ColaboradoresUiState
+
+private const val DESTINO_INICIO = "inicio"
+private const val DESTINO_COLABORADORES = "colaboradores"
 
 @Composable
 fun PlanillaApp(
     state: AuthUiState,
+    colaboradoresState: ColaboradoresUiState,
     onLogin: (String, String) -> Unit,
     onLogout: () -> Unit,
     onDismissError: () -> Unit,
+    onOpenColaboradores: () -> Unit,
+    onRefreshColaboradores: () -> Unit,
+    onSearchColaboradores: (String) -> Unit,
 ) {
+    var destino by rememberSaveable(state.user?.id) {
+        mutableStateOf(DESTINO_INICIO)
+    }
+
     when {
         state.restoringSession -> LoadingScreen("Comprobando sesión…")
         state.user == null -> LoginScreen(
@@ -53,10 +72,24 @@ fun PlanillaApp(
             onLogin = onLogin,
             onDismissError = onDismissError,
         )
+        destino == DESTINO_COLABORADORES -> ColaboradoresScreen(
+            user = state.user,
+            state = colaboradoresState,
+            onBack = { destino = DESTINO_INICIO },
+            onRefresh = onRefreshColaboradores,
+            onSearch = onSearchColaboradores,
+        )
         else -> HomeScreen(
             user = state.user,
             loggingOut = state.working,
-            onLogout = onLogout,
+            onOpenColaboradores = {
+                destino = DESTINO_COLABORADORES
+                onOpenColaboradores()
+            },
+            onLogout = {
+                destino = DESTINO_INICIO
+                onLogout()
+            },
         )
     }
 }
@@ -177,6 +210,15 @@ private fun LoginScreen(
                         Text("Iniciar sesión")
                     }
                 }
+                if (loading) {
+                    Text(
+                        text = "Conectando con el servidor. Si estaba inactivo, puede tardar hasta un minuto.",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
                 Text(
                     text = "Conexión protegida mediante HTTPS",
                     modifier = Modifier.fillMaxWidth(),
@@ -193,73 +235,312 @@ private fun LoginScreen(
 private fun HomeScreen(
     user: UsuarioMovil,
     loggingOut: Boolean,
+    onOpenColaboradores: () -> Unit,
     onLogout: () -> Unit,
 ) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .safeDrawingPadding()
+            .padding(horizontal = 24.dp),
+        contentPadding = PaddingValues(vertical = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(18.dp),
+    ) {
+        item {
+            Text(
+                text = "PLANILLA DE NOVEDADES",
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+        item {
+            Text(
+                text = "Bienvenido, ${user.nombre.ifBlank { user.username }}",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+        item {
+            Text(
+                text = "Selecciona una función para trabajar con la información autorizada para tu perfil.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        item {
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.large,
+                tonalElevation = 2.dp,
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    DetailRow("Usuario", user.username)
+                    HorizontalDivider()
+                    DetailRow("Rol", user.rol)
+                    HorizontalDivider()
+                    DetailRow(
+                        "Sucursal",
+                        user.sucursal?.nombre ?: "Acceso a todas las sucursales",
+                    )
+                }
+            }
+        }
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                if (user.puedeModificar) {
+                    AssistChip(onClick = {}, label = { Text("Puede modificar") })
+                }
+                if (user.puedeExportar) {
+                    AssistChip(onClick = {}, label = { Text("Puede exportar") })
+                }
+            }
+        }
+        item {
+            Text(
+                text = "Gestión móvil",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+        item {
+            ModuleCard(
+                title = "Colaboradores",
+                description = "Consulta y busca el personal visible para tu sucursal.",
+                onClick = onOpenColaboradores,
+            )
+        }
+        item {
+            Text(
+                text = "Los períodos, novedades y exportaciones se incorporarán en las siguientes etapas.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+        item {
+            OutlinedButton(
+                onClick = onLogout,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                enabled = !loggingOut,
+            ) {
+                Text(if (loggingOut) "Cerrando sesión…" else "Cerrar sesión")
+            }
+        }
+    }
+}
+
+@Composable
+private fun ModuleCard(
+    title: String,
+    description: String,
+    onClick: () -> Unit,
+) {
+    Surface(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.primaryContainer,
+        tonalElevation = 2.dp,
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            Text(
+                text = description,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            Text(
+                text = "Abrir →",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
+    }
+}
+
+@Composable
+private fun ColaboradoresScreen(
+    user: UsuarioMovil,
+    state: ColaboradoresUiState,
+    onBack: () -> Unit,
+    onRefresh: () -> Unit,
+    onSearch: (String) -> Unit,
+) {
+    BackHandler(onBack = onBack)
+
+    val filtrados = remember(state.query, state.colaboradores) {
+        val texto = state.query.trim()
+        if (texto.isBlank()) {
+            state.colaboradores
+        } else {
+            state.colaboradores.filter { colaborador ->
+                colaborador.nombreCompleto.contains(texto, ignoreCase = true) ||
+                    colaborador.rut.contains(texto, ignoreCase = true) ||
+                    colaborador.sucursalNombre.contains(texto, ignoreCase = true)
+            }
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .safeDrawingPadding()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp),
+            .padding(horizontal = 20.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        TextButton(onClick = onBack) {
+            Text("← Volver al panel")
+        }
         Text(
-            text = "PLANILLA DE NOVEDADES",
-            color = MaterialTheme.colorScheme.primary,
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Bold,
-        )
-        Text(
-            text = "Bienvenido, ${user.nombre.ifBlank { user.username }}",
+            text = "Colaboradores",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
         )
         Text(
-            text = "La aplicación ya está conectada con Django y reconoció tu perfil.",
+            text = user.sucursal?.nombre ?: "Todas las sucursales autorizadas",
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-
-        Surface(
+        OutlinedTextField(
+            value = state.query,
+            onValueChange = onSearch,
             modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.large,
-            tonalElevation = 2.dp,
-        ) {
-            Column(
-                modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+            label = { Text("Buscar por nombre, RUT o sucursal") },
+            singleLine = true,
+        )
+
+        when {
+            state.loading -> Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentAlignment = Alignment.Center,
             ) {
-                DetailRow("Usuario", user.username)
-                HorizontalDivider()
-                DetailRow("Rol", user.rol)
-                HorizontalDivider()
-                DetailRow(
-                    "Sucursal",
-                    user.sucursal?.nombre ?: "Acceso a todas las sucursales",
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularProgressIndicator()
+                    Spacer(Modifier.height(12.dp))
+                    Text("Consultando colaboradores…")
+                }
+            }
+
+            state.errorMessage != null -> Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Text(
+                        text = state.errorMessage,
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center,
+                    )
+                    Button(onClick = onRefresh) {
+                        Text("Intentar nuevamente")
+                    }
+                }
+            }
+
+            else -> {
+                Text(
+                    text = "Mostrando ${filtrados.size} de ${state.total}",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                if (filtrados.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = "No se encontraron colaboradores.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(bottom = 20.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        items(
+                            items = filtrados,
+                            key = { it.id },
+                        ) { colaborador ->
+                            ColaboradorCard(colaborador)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ColaboradorCard(colaborador: ColaboradorMovil) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        tonalElevation = 2.dp,
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Text(
+                text = colaborador.nombreCompleto,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                text = "RUT: ${colaborador.rut}",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = "Sucursal: ${colaborador.sucursalNombre}",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Surface(
+                shape = MaterialTheme.shapes.small,
+                color = if (colaborador.activo) {
+                    MaterialTheme.colorScheme.primaryContainer
+                } else {
+                    MaterialTheme.colorScheme.errorContainer
+                },
+            ) {
+                Text(
+                    text = if (colaborador.activo) "Activo" else "Inactivo",
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (colaborador.activo) {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.onErrorContainer
+                    },
                 )
             }
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            if (user.puedeModificar) {
-                AssistChip(onClick = {}, label = { Text("Puede modificar") })
-            }
-            if (user.puedeExportar) {
-                AssistChip(onClick = {}, label = { Text("Puede exportar") })
-            }
-        }
-
-        Spacer(Modifier.weight(1f))
-        OutlinedButton(
-            onClick = onLogout,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-            enabled = !loggingOut,
-        ) {
-            Text(if (loggingOut) "Cerrando sesión…" else "Cerrar sesión")
         }
     }
 }

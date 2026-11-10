@@ -1,7 +1,9 @@
 package com.planillanovedades.mobile.data.repository
 
+import com.planillanovedades.mobile.data.model.ColaboradorMovil
 import com.planillanovedades.mobile.data.model.LoginRequest
 import com.planillanovedades.mobile.data.model.LoginResponse
+import com.planillanovedades.mobile.data.model.PaginatedResponse
 import com.planillanovedades.mobile.data.model.UsuarioMovil
 import com.planillanovedades.mobile.data.model.UsuarioResponse
 import com.planillanovedades.mobile.data.remote.ApiService
@@ -83,4 +85,13 @@ private class FakeApiService : ApiService {
     override suspend fun currentUser(): UsuarioResponse = UsuarioResponse(user)
 
     override suspend fun logout(): Response<Unit> = Response.success(Unit)
+
+    override suspend fun colaboradores(
+        page: Int,
+    ): PaginatedResponse<ColaboradorMovil> = PaginatedResponse(
+        count = 0,
+        next = null,
+        previous = null,
+        results = emptyList(),
+    )
 }

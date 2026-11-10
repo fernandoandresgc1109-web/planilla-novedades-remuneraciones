@@ -141,6 +141,8 @@ La aplicación web se conservará como sistema central y panel administrativo. L
 
 La API incorpora autenticación por token para Android, consulta del usuario activo y cierre de sesión móvil. El cliente Android nativo incluye inicio de sesión, conservación cifrada del token, recuperación de sesión y visualización del rol, la sucursal y los permisos. La autenticación por sesión de la interfaz web se mantiene sin cambios.
 
+La siguiente etapa incorpora un panel móvil y la consulta de colaboradores. La aplicación recorre la paginación de la API, permite buscar por nombre, RUT o sucursal y muestra únicamente los datos que Django autoriza según el rol y la sede. También amplía el tiempo de espera para soportar el inicio en frío del servicio gratuito de Render.
+
 ## Seguridad implementada
 
 La aplicación utiliza autenticación mediante sesiones seguras de Django y permisos para usuarios autenticados.
@@ -208,6 +210,7 @@ Los archivos reales utilizados para analizar el proceso no se incluyen en el rep
 - [x] Preparación de la autenticación de la API para el cliente Android.
 - [x] Creación del proyecto Android con Kotlin y Jetpack Compose.
 - [x] Integración inicial de Android con la API REST.
+- [x] Panel móvil y consulta de colaboradores.
 - [ ] Pruebas y demostración de la aplicación móvil.
 - [ ] Presentación y entrega final.
 
@@ -232,6 +235,7 @@ Los archivos reales utilizados para analizar el proceso no se incluyen en el rep
 | 24-09-2026 | Migración de PostgreSQL de Render a Neon | Se generó y validó un respaldo en formato personalizado, se restauraron 21 tablas en Neon PostgreSQL 18, se verificaron los registros, se configuró conexión agrupada mediante una variable de entorno y se confirmó el despliegue operativo en Render. El cambio se integró mediante el pull request 13. |
 | 05-11-2026 | Inicio de la adaptación móvil | Se preparó la API para autenticar clientes Android mediante token, consultar el usuario y sus permisos e invalidar el acceso al cerrar sesión; se conservaron las sesiones de la interfaz web y el aislamiento multisucursal. |
 | 09-11-2026 | Creación del cliente Android | Se creó la aplicación nativa con Kotlin y Jetpack Compose; se conectó con la autenticación de Django, se cifró el token local, se recuperó la sesión y se mostraron el rol, la sucursal y los permisos del usuario. |
+| 10-11-2026 | Panel móvil y consulta de colaboradores | Se comprobó el inicio, recuperación y cierre de sesión en el emulador; se agregó el panel principal, el listado paginado de colaboradores, la búsqueda por nombre, RUT o sucursal, el nombre legible de la sede y una espera mayor para el inicio en frío de Render. |
 
 ## Consideraciones de privacidad
 

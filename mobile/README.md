@@ -11,6 +11,11 @@ Esta carpeta contiene el cliente Android nativo del sistema. La aplicación no r
 - Recuperación de la sesión al volver a abrir la aplicación.
 - Visualización del usuario, rol, sucursal y permisos.
 - Cierre de sesión local y en el servidor.
+- Panel principal móvil con acceso a las funciones disponibles.
+- Listado de colaboradores filtrado por los permisos de Django.
+- Búsqueda local por nombre, RUT o sucursal.
+- Consulta automática de todas las páginas de resultados.
+- Tiempo de espera ampliado para el inicio en frío de Render.
 
 ## Cómo abrir el proyecto
 
@@ -29,3 +34,5 @@ GitHub Actions ejecuta las pruebas unitarias y compila un APK de depuración en 
 ## Explicación sencilla
 
 La pantalla móvil envía el usuario y la contraseña al servidor Django. Si los datos son correctos, el servidor entrega un token. El teléfono guarda ese token cifrado y lo incluye en las siguientes solicitudes. Django sigue siendo responsable de comprobar el rol y la sucursal, por lo que la aplicación móvil no puede saltarse las reglas del sistema.
+
+Después de iniciar sesión, el panel permite consultar colaboradores. Android solicita la información a la API y Django devuelve únicamente los registros autorizados para el usuario. El buscador trabaja sobre la información recibida y el nombre de la sucursal se entrega como un dato de solo lectura.
