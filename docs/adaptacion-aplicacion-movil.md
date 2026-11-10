@@ -104,3 +104,24 @@ GitHub Actions ejecuta automáticamente las pruebas unitarias y la compilación 
 ### Explicación para la sustentación
 
 > Primero preparé Django para aceptar tokens y después construí un cliente Android nativo. La aplicación móvil envía las credenciales por HTTPS, recibe un token y lo guarda cifrado. En cada solicitud, Django identifica al usuario y aplica las reglas de rol y sucursal. Por eso la seguridad sigue centralizada en el servidor y no depende únicamente del teléfono.
+
+
+## 9. Tercera etapa: panel y colaboradores
+
+La aplicación incorpora un panel principal desde el cual se abre el primer módulo funcional: colaboradores.
+
+El flujo es el siguiente:
+
+1. Android solicita `/api/colaboradores/` con el token del usuario.
+2. Django identifica el usuario y filtra el conjunto de datos según su sucursal.
+3. La aplicación recorre todas las páginas de resultados.
+4. El usuario puede buscar por nombre, RUT o sucursal.
+5. Al cerrar sesión se elimina la información del listado que estaba en memoria.
+
+La API agregó `sucursal_nombre` como campo de solo lectura para mostrar una sede comprensible sin permitir que el teléfono cambie las reglas de asignación.
+
+También se ampliaron los tiempos de espera de red. Esto permite que la aplicación espere el inicio en frío del servicio gratuito de Render y muestra un mensaje claro mientras se establece la conexión.
+
+### Explicación para la sustentación
+
+> El primer módulo móvil consulta colaboradores. La aplicación envía el token, pero Django decide qué registros puede ver cada persona. Un operador recibe solamente su sucursal y el administrador global puede consultar todas. Android presenta los resultados y permite buscarlos, pero la regla de seguridad permanece en el servidor.

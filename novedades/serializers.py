@@ -65,6 +65,11 @@ class InstitucionSaludSerializer(serializers.ModelSerializer):
 
 
 class ColaboradorSerializer(serializers.ModelSerializer):
+    sucursal_nombre = serializers.CharField(
+        source="sucursal.nombre",
+        read_only=True,
+    )
+
     class Meta:
         model = Colaborador
         fields = (
@@ -73,6 +78,7 @@ class ColaboradorSerializer(serializers.ModelSerializer):
             "nombres",
             "apellidos",
             "sucursal",
+            "sucursal_nombre",
             "banco",
             "numero_cuenta",
             "tipo_cuenta",

@@ -99,6 +99,23 @@ class ApiRestTests(APITestCase):
         self.assertEqual(respuesta.data["count"], 1)
         self.assertIn("results", respuesta.data)
 
+    def test_listado_colaboradores_incluye_nombre_sucursal(self):
+        self.autenticar()
+
+        respuesta = self.client.get(
+            reverse("api:colaborador-list")
+        )
+
+        self.assertEqual(
+            respuesta.status_code,
+            status.HTTP_200_OK,
+        )
+        self.assertEqual(respuesta.data["count"], 1)
+        self.assertEqual(
+            respuesta.data["results"][0]["sucursal_nombre"],
+            self.sucursal.nombre,
+        )
+
     def test_crear_y_validar_novedad_registra_usuario(self):
         self.autenticar()
 

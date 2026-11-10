@@ -8,6 +8,7 @@ import androidx.activity.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.planillanovedades.mobile.ui.PlanillaApp
 import com.planillanovedades.mobile.ui.auth.AuthViewModel
+import com.planillanovedades.mobile.ui.colaboradores.ColaboradoresViewModel
 import com.planillanovedades.mobile.ui.theme.PlanillaNovedadesTheme
 
 class MainActivity : ComponentActivity() {
@@ -16,17 +17,37 @@ class MainActivity : ComponentActivity() {
         AuthViewModel.Factory(repository)
     }
 
+    private val colaboradoresViewModel: ColaboradoresViewModel by viewModels {
+        val repository = (application as PlanillaApplication).colaboradorRepository
+        ColaboradoresViewModel.Factory(repository)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             PlanillaNovedadesTheme {
-                val state = authViewModel.uiState.collectAsStateWithLifecycle().value
+                val authState = authViewModel.uiState
+                    .collectAsStateWithLifecycle().value
+                val colaboradoresState = colaboradoresViewModel.uiState
+                    .collectAsStateWithLifecycle().value
+
                 PlanillaApp(
-                    state = state,
+                    state = authState,
+                    colaboradoresState = colaboradoresState,
                     onLogin = authViewModel::login,
-                    onLogout = authViewModel::logout,
+                    onLogout = {
+                        colaboradoresViewModel.clear()
+                        authViewModel.logout()
+                    },
                     onDismissError = authViewModel::dismissError,
+                    onOpenColaboradores = {
+                        colaboradoresViewModel.load()
+                    },
+                    onRefreshColaboradores = {
+                        colaboradoresViewModel.load(force = true)
+                    },
+                    onSearchColaboradores = colaboradoresViewModel::updateQuery,
                 )
             }
         }
