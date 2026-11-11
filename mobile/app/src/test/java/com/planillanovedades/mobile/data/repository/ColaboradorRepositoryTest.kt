@@ -3,6 +3,7 @@ package com.planillanovedades.mobile.data.repository
 import com.planillanovedades.mobile.data.model.ColaboradorMovil
 import com.planillanovedades.mobile.data.model.LoginRequest
 import com.planillanovedades.mobile.data.model.LoginResponse
+import com.planillanovedades.mobile.data.model.NovedadMovil
 import com.planillanovedades.mobile.data.model.PaginatedResponse
 import com.planillanovedades.mobile.data.model.UsuarioMovil
 import com.planillanovedades.mobile.data.model.UsuarioResponse
@@ -61,6 +62,15 @@ private class FakeColaboradoresApiService : ApiService {
         UsuarioResponse(usuarioPrueba())
 
     override suspend fun logout(): Response<Unit> = Response.success(Unit)
+
+    override suspend fun novedades(
+        page: Int,
+    ): PaginatedResponse<NovedadMovil> = PaginatedResponse(
+        count = 0,
+        next = null,
+        previous = null,
+        results = emptyList(),
+    )
 
     private fun usuarioPrueba() = UsuarioMovil(
         id = 1,

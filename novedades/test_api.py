@@ -116,6 +116,47 @@ class ApiRestTests(APITestCase):
             self.sucursal.nombre,
         )
 
+    def test_listado_novedades_incluye_datos_legibles(self):
+        Novedad.objects.create(
+            periodo=self.periodo,
+            colaborador=self.colaborador,
+            tipo_novedad=self.tipo_novedad,
+            monto="45000.00",
+            observacion="Prueba de consulta móvil.",
+            creado_por=self.usuario,
+        )
+        self.autenticar()
+
+        respuesta = self.client.get(
+            reverse("api:novedad-list")
+        )
+
+        self.assertEqual(
+            respuesta.status_code,
+            status.HTTP_200_OK,
+        )
+        registro = respuesta.data["results"][0]
+        self.assertEqual(
+            registro["periodo_descripcion"],
+            "08/2026",
+        )
+        self.assertEqual(
+            registro["sucursal_nombre"],
+            self.sucursal.nombre,
+        )
+        self.assertEqual(
+            registro["colaborador_nombre"],
+            "Nombre API Apellido Ficticio",
+        )
+        self.assertEqual(
+            registro["colaborador_rut"],
+            self.colaborador.rut,
+        )
+        self.assertEqual(
+            registro["tipo_novedad_nombre"],
+            self.tipo_novedad.nombre,
+        )
+
     def test_crear_y_validar_novedad_registra_usuario(self):
         self.autenticar()
 

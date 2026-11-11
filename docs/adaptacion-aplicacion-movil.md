@@ -125,3 +125,17 @@ También se ampliaron los tiempos de espera de red. Esto permite que la aplicaci
 ### Explicación para la sustentación
 
 > El primer módulo móvil consulta colaboradores. La aplicación envía el token, pero Django decide qué registros puede ver cada persona. Un operador recibe solamente su sucursal y el administrador global puede consultar todas. Android presenta los resultados y permite buscarlos, pero la regla de seguridad permanece en el servidor.
+
+## 10. Cuarta etapa: consulta de novedades
+
+El panel incorpora el módulo de novedades. La aplicación consulta `/api/novedades/`, recorre todas las páginas y permite buscar por colaborador, RUT, tipo, período, sucursal o estado.
+
+Django entrega campos adicionales de solo lectura con nombres comprensibles para el teléfono: período, sucursal, colaborador, RUT y tipo de novedad. Los identificadores y las relaciones originales se conservan.
+
+Cada tarjeta presenta el valor o la cantidad, las fechas cuando corresponden, la observación y el estado de la novedad. Al cerrar sesión, la información consultada se elimina de la memoria de la aplicación.
+
+El aislamiento multisucursal sigue en el servidor. Un operador solo recibe las novedades de su sede, mientras que los perfiles globales reciben la información permitida por su rol.
+
+### Explicación para la sustentación
+
+> El segundo módulo móvil consulta las novedades de remuneración. Android solicita los datos con el token y Django filtra primero la sucursal autorizada. El teléfono recibe nombres comprensibles para mostrar la persona, el período y el tipo de novedad, pero no decide los permisos. Así se mantiene una sola fuente de seguridad para la aplicación web y la móvil.

@@ -9,6 +9,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.planillanovedades.mobile.ui.PlanillaApp
 import com.planillanovedades.mobile.ui.auth.AuthViewModel
 import com.planillanovedades.mobile.ui.colaboradores.ColaboradoresViewModel
+import com.planillanovedades.mobile.ui.novedades.NovedadesViewModel
 import com.planillanovedades.mobile.ui.theme.PlanillaNovedadesTheme
 
 class MainActivity : ComponentActivity() {
@@ -22,6 +23,11 @@ class MainActivity : ComponentActivity() {
         ColaboradoresViewModel.Factory(repository)
     }
 
+    private val novedadesViewModel: NovedadesViewModel by viewModels {
+        val repository = (application as PlanillaApplication).novedadRepository
+        NovedadesViewModel.Factory(repository)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -31,13 +37,17 @@ class MainActivity : ComponentActivity() {
                     .collectAsStateWithLifecycle().value
                 val colaboradoresState = colaboradoresViewModel.uiState
                     .collectAsStateWithLifecycle().value
+                val novedadesState = novedadesViewModel.uiState
+                    .collectAsStateWithLifecycle().value
 
                 PlanillaApp(
                     state = authState,
                     colaboradoresState = colaboradoresState,
+                    novedadesState = novedadesState,
                     onLogin = authViewModel::login,
                     onLogout = {
                         colaboradoresViewModel.clear()
+                        novedadesViewModel.clear()
                         authViewModel.logout()
                     },
                     onDismissError = authViewModel::dismissError,
@@ -48,6 +58,13 @@ class MainActivity : ComponentActivity() {
                         colaboradoresViewModel.load(force = true)
                     },
                     onSearchColaboradores = colaboradoresViewModel::updateQuery,
+                    onOpenNovedades = {
+                        novedadesViewModel.load()
+                    },
+                    onRefreshNovedades = {
+                        novedadesViewModel.load(force = true)
+                    },
+                    onSearchNovedades = novedadesViewModel::updateQuery,
                 )
             }
         }

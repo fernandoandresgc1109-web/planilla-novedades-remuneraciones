@@ -42,23 +42,30 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.planillanovedades.mobile.data.model.ColaboradorMovil
+import com.planillanovedades.mobile.data.model.NovedadMovil
 import com.planillanovedades.mobile.data.model.UsuarioMovil
 import com.planillanovedades.mobile.ui.auth.AuthUiState
 import com.planillanovedades.mobile.ui.colaboradores.ColaboradoresUiState
+import com.planillanovedades.mobile.ui.novedades.NovedadesUiState
 
 private const val DESTINO_INICIO = "inicio"
 private const val DESTINO_COLABORADORES = "colaboradores"
+private const val DESTINO_NOVEDADES = "novedades"
 
 @Composable
 fun PlanillaApp(
     state: AuthUiState,
     colaboradoresState: ColaboradoresUiState,
+    novedadesState: NovedadesUiState,
     onLogin: (String, String) -> Unit,
     onLogout: () -> Unit,
     onDismissError: () -> Unit,
     onOpenColaboradores: () -> Unit,
     onRefreshColaboradores: () -> Unit,
     onSearchColaboradores: (String) -> Unit,
+    onOpenNovedades: () -> Unit,
+    onRefreshNovedades: () -> Unit,
+    onSearchNovedades: (String) -> Unit,
 ) {
     var destino by rememberSaveable(state.user?.id) {
         mutableStateOf(DESTINO_INICIO)
@@ -79,12 +86,23 @@ fun PlanillaApp(
             onRefresh = onRefreshColaboradores,
             onSearch = onSearchColaboradores,
         )
+        destino == DESTINO_NOVEDADES -> NovedadesScreen(
+            user = state.user,
+            state = novedadesState,
+            onBack = { destino = DESTINO_INICIO },
+            onRefresh = onRefreshNovedades,
+            onSearch = onSearchNovedades,
+        )
         else -> HomeScreen(
             user = state.user,
             loggingOut = state.working,
             onOpenColaboradores = {
                 destino = DESTINO_COLABORADORES
                 onOpenColaboradores()
+            },
+            onOpenNovedades = {
+                destino = DESTINO_NOVEDADES
+                onOpenNovedades()
             },
             onLogout = {
                 destino = DESTINO_INICIO
@@ -236,6 +254,7 @@ private fun HomeScreen(
     user: UsuarioMovil,
     loggingOut: Boolean,
     onOpenColaboradores: () -> Unit,
+    onOpenNovedades: () -> Unit,
     onLogout: () -> Unit,
 ) {
     LazyColumn(
@@ -317,8 +336,15 @@ private fun HomeScreen(
             )
         }
         item {
+            ModuleCard(
+                title = "Novedades",
+                description = "Consulta los registros autorizados y su estado actual.",
+                onClick = onOpenNovedades,
+            )
+        }
+        item {
             Text(
-                text = "Los períodos, novedades y exportaciones se incorporarán en las siguientes etapas.",
+                text = "El registro de novedades, los períodos y las exportaciones se incorporarán en las siguientes etapas.",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodySmall,
             )
@@ -539,6 +565,216 @@ private fun ColaboradorCard(colaborador: ColaboradorMovil) {
                     } else {
                         MaterialTheme.colorScheme.onErrorContainer
                     },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun NovedadesScreen(
+    user: UsuarioMovil,
+    state: NovedadesUiState,
+    onBack: () -> Unit,
+    onRefresh: () -> Unit,
+    onSearch: (String) -> Unit,
+) {
+    BackHandler(onBack = onBack)
+
+    val filtradas = remember(state.query, state.novedades) {
+        val texto = state.query.trim()
+        if (texto.isBlank()) {
+            state.novedades
+        } else {
+            state.novedades.filter { novedad ->
+                novedad.colaboradorNombre.contains(texto, ignoreCase = true) ||
+                    novedad.colaboradorRut.contains(texto, ignoreCase = true) ||
+                    novedad.tipoNovedadNombre.contains(texto, ignoreCase = true) ||
+                    novedad.periodoDescripcion.contains(texto, ignoreCase = true) ||
+                    novedad.sucursalNombre.contains(texto, ignoreCase = true) ||
+                    novedad.estado.contains(texto, ignoreCase = true)
+            }
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .safeDrawingPadding()
+            .padding(horizontal = 20.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        TextButton(onClick = onBack) {
+            Text("← Volver al panel")
+        }
+        Text(
+            text = "Novedades",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            text = user.sucursal?.nombre ?: "Todas las sucursales autorizadas",
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        OutlinedTextField(
+            value = state.query,
+            onValueChange = onSearch,
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("Buscar persona, RUT, tipo, período o sucursal") },
+            singleLine = true,
+        )
+
+        when {
+            state.loading -> Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularProgressIndicator()
+                    Spacer(Modifier.height(12.dp))
+                    Text("Consultando novedades…")
+                }
+            }
+
+            state.errorMessage != null -> Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Text(
+                        text = state.errorMessage,
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center,
+                    )
+                    Button(onClick = onRefresh) {
+                        Text("Intentar nuevamente")
+                    }
+                }
+            }
+
+            else -> {
+                Text(
+                    text = "Mostrando ${filtradas.size} de ${state.total}",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                if (filtradas.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = "No se encontraron novedades.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(bottom = 20.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        items(
+                            items = filtradas,
+                            key = { it.id },
+                        ) { novedad ->
+                            NovedadCard(novedad)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun NovedadCard(novedad: NovedadMovil) {
+    val estadoContainer = when (novedad.estado) {
+        "VALIDADA" -> MaterialTheme.colorScheme.primaryContainer
+        "ANULADA" -> MaterialTheme.colorScheme.errorContainer
+        else -> MaterialTheme.colorScheme.secondaryContainer
+    }
+    val estadoContent = when (novedad.estado) {
+        "VALIDADA" -> MaterialTheme.colorScheme.onPrimaryContainer
+        "ANULADA" -> MaterialTheme.colorScheme.onErrorContainer
+        else -> MaterialTheme.colorScheme.onSecondaryContainer
+    }
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        tonalElevation = 2.dp,
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Text(
+                text = novedad.colaboradorNombre,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                text = "${novedad.tipoNovedadNombre} · ${novedad.periodoDescripcion}",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = "RUT: ${novedad.colaboradorRut}",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = "Sucursal: ${novedad.sucursalNombre}",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            novedad.monto?.let {
+                Text(
+                    text = "Monto: \$$it",
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+            novedad.cantidad?.let {
+                Text(
+                    text = "Cantidad: $it",
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+            if (novedad.fechaInicio != null || novedad.fechaTermino != null) {
+                Text(
+                    text = listOfNotNull(
+                        novedad.fechaInicio,
+                        novedad.fechaTermino,
+                    ).joinToString(" a ", prefix = "Fechas: "),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            if (novedad.observacion.isNotBlank()) {
+                Text(
+                    text = novedad.observacion,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+            Surface(
+                shape = MaterialTheme.shapes.small,
+                color = estadoContainer,
+            ) {
+                Text(
+                    text = novedad.estado.lowercase()
+                        .replaceFirstChar { it.uppercase() },
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = estadoContent,
                 )
             }
         }
