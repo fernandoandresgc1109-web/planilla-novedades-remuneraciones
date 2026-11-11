@@ -4,7 +4,10 @@ import com.planillanovedades.mobile.data.model.ColaboradorMovil
 import com.planillanovedades.mobile.data.model.LoginRequest
 import com.planillanovedades.mobile.data.model.LoginResponse
 import com.planillanovedades.mobile.data.model.NovedadMovil
+import com.planillanovedades.mobile.data.model.NuevaNovedadRequest
 import com.planillanovedades.mobile.data.model.PaginatedResponse
+import com.planillanovedades.mobile.data.model.PeriodoMovil
+import com.planillanovedades.mobile.data.model.TipoNovedadMovil
 import com.planillanovedades.mobile.data.model.UsuarioResponse
 import retrofit2.Response
 import retrofit2.http.Body
@@ -31,4 +34,19 @@ interface ApiService {
     suspend fun novedades(
         @Query("page") page: Int = 1,
     ): PaginatedResponse<NovedadMovil>
+
+    @GET("api/periodos/")
+    suspend fun periodos(
+        @Query("page") page: Int = 1,
+    ): PaginatedResponse<PeriodoMovil>
+
+    @GET("api/tipos-novedad/")
+    suspend fun tiposNovedad(
+        @Query("page") page: Int = 1,
+    ): PaginatedResponse<TipoNovedadMovil>
+
+    @POST("api/novedades/")
+    suspend fun crearNovedad(
+        @Body request: NuevaNovedadRequest,
+    ): NovedadMovil
 }

@@ -4,7 +4,10 @@ import com.planillanovedades.mobile.data.model.ColaboradorMovil
 import com.planillanovedades.mobile.data.model.LoginRequest
 import com.planillanovedades.mobile.data.model.LoginResponse
 import com.planillanovedades.mobile.data.model.NovedadMovil
+import com.planillanovedades.mobile.data.model.NuevaNovedadRequest
 import com.planillanovedades.mobile.data.model.PaginatedResponse
+import com.planillanovedades.mobile.data.model.PeriodoMovil
+import com.planillanovedades.mobile.data.model.TipoNovedadMovil
 import com.planillanovedades.mobile.data.model.UsuarioMovil
 import com.planillanovedades.mobile.data.model.UsuarioResponse
 import com.planillanovedades.mobile.data.remote.ApiService
@@ -71,6 +74,28 @@ private class FakeColaboradoresApiService : ApiService {
         previous = null,
         results = emptyList(),
     )
+
+    override suspend fun periodos(
+        page: Int,
+    ): PaginatedResponse<PeriodoMovil> = PaginatedResponse(
+        count = 0,
+        next = null,
+        previous = null,
+        results = emptyList(),
+    )
+
+    override suspend fun tiposNovedad(
+        page: Int,
+    ): PaginatedResponse<TipoNovedadMovil> = PaginatedResponse(
+        count = 0,
+        next = null,
+        previous = null,
+        results = emptyList(),
+    )
+
+    override suspend fun crearNovedad(
+        request: NuevaNovedadRequest,
+    ): NovedadMovil = error("No utilizado en estas pruebas")
 
     private fun usuarioPrueba() = UsuarioMovil(
         id = 1,

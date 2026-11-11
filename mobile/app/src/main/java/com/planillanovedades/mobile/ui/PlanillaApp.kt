@@ -47,16 +47,21 @@ import com.planillanovedades.mobile.data.model.UsuarioMovil
 import com.planillanovedades.mobile.ui.auth.AuthUiState
 import com.planillanovedades.mobile.ui.colaboradores.ColaboradoresUiState
 import com.planillanovedades.mobile.ui.novedades.NovedadesUiState
+import com.planillanovedades.mobile.ui.novedades.NuevaNovedadFormData
+import com.planillanovedades.mobile.ui.novedades.NuevaNovedadScreen
+import com.planillanovedades.mobile.ui.novedades.NuevaNovedadUiState
 
 private const val DESTINO_INICIO = "inicio"
 private const val DESTINO_COLABORADORES = "colaboradores"
 private const val DESTINO_NOVEDADES = "novedades"
+private const val DESTINO_NUEVA_NOVEDAD = "nueva_novedad"
 
 @Composable
 fun PlanillaApp(
     state: AuthUiState,
     colaboradoresState: ColaboradoresUiState,
     novedadesState: NovedadesUiState,
+    nuevaNovedadState: NuevaNovedadUiState,
     onLogin: (String, String) -> Unit,
     onLogout: () -> Unit,
     onDismissError: () -> Unit,
@@ -66,6 +71,11 @@ fun PlanillaApp(
     onOpenNovedades: () -> Unit,
     onRefreshNovedades: () -> Unit,
     onSearchNovedades: (String) -> Unit,
+    onOpenNuevaNovedad: () -> Unit,
+    onRetryNuevaNovedad: () -> Unit,
+    onDismissNuevaNovedadError: () -> Unit,
+    onSubmitNuevaNovedad: (NuevaNovedadFormData) -> Unit,
+    onCreatedNovedad: () -> Unit,
 ) {
     var destino by rememberSaveable(state.user?.id) {
         mutableStateOf(DESTINO_INICIO)
@@ -93,6 +103,18 @@ fun PlanillaApp(
             onRefresh = onRefreshNovedades,
             onSearch = onSearchNovedades,
         )
+        destino == DESTINO_NUEVA_NOVEDAD -> NuevaNovedadScreen(
+            user = state.user,
+            state = nuevaNovedadState,
+            onBack = { destino = DESTINO_INICIO },
+            onRetryOptions = onRetryNuevaNovedad,
+            onDismissError = onDismissNuevaNovedadError,
+            onSubmit = onSubmitNuevaNovedad,
+            onViewNovedades = {
+                destino = DESTINO_NOVEDADES
+                onCreatedNovedad()
+            },
+        )
         else -> HomeScreen(
             user = state.user,
             loggingOut = state.working,
@@ -103,6 +125,10 @@ fun PlanillaApp(
             onOpenNovedades = {
                 destino = DESTINO_NOVEDADES
                 onOpenNovedades()
+            },
+            onOpenNuevaNovedad = {
+                destino = DESTINO_NUEVA_NOVEDAD
+                onOpenNuevaNovedad()
             },
             onLogout = {
                 destino = DESTINO_INICIO
@@ -255,6 +281,7 @@ private fun HomeScreen(
     loggingOut: Boolean,
     onOpenColaboradores: () -> Unit,
     onOpenNovedades: () -> Unit,
+    onOpenNuevaNovedad: () -> Unit,
     onLogout: () -> Unit,
 ) {
     LazyColumn(
@@ -342,9 +369,18 @@ private fun HomeScreen(
                 onClick = onOpenNovedades,
             )
         }
+        if (user.puedeModificar) {
+            item {
+                ModuleCard(
+                    title = "Registrar novedad",
+                    description = "Crea un registro en borrador para revisión.",
+                    onClick = onOpenNuevaNovedad,
+                )
+            }
+        }
         item {
             Text(
-                text = "El registro de novedades, los períodos y las exportaciones se incorporarán en las siguientes etapas.",
+                text = "Los períodos, la validación y las exportaciones se incorporarán en las siguientes etapas.",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodySmall,
             )

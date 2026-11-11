@@ -50,3 +50,40 @@ data class NovedadMovil(
     val observacion: String,
     val estado: String,
 )
+
+data class PeriodoMovil(
+    val id: Int,
+    val sucursal: Int,
+    @SerializedName("sucursal_nombre")
+    val sucursalNombre: String,
+    val anio: Int,
+    val mes: Int,
+    val estado: String,
+) {
+    val descripcion: String
+        get() = "%02d/%d · %s".format(mes, anio, sucursalNombre)
+}
+
+data class TipoNovedadMovil(
+    val id: Int,
+    val codigo: String,
+    val nombre: String,
+    @SerializedName("unidad_medida")
+    val unidadMedida: String,
+    val naturaleza: String,
+    val activo: Boolean,
+)
+
+data class NuevaNovedadRequest(
+    val periodo: Int,
+    val colaborador: Int,
+    @SerializedName("tipo_novedad")
+    val tipoNovedad: Int,
+    @SerializedName("fecha_inicio")
+    val fechaInicio: String?,
+    @SerializedName("fecha_termino")
+    val fechaTermino: String?,
+    val cantidad: String?,
+    val monto: String?,
+    val observacion: String,
+)

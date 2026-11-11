@@ -109,11 +109,17 @@ class ContratoSerializer(serializers.ModelSerializer):
 
 
 class PeriodoLiquidacionSerializer(serializers.ModelSerializer):
+    sucursal_nombre = serializers.CharField(
+        source="sucursal.nombre",
+        read_only=True,
+    )
+
     class Meta:
         model = PeriodoLiquidacion
         fields = (
             "id",
             "sucursal",
+            "sucursal_nombre",
             "anio",
             "mes",
             "fecha_inicio",
@@ -159,6 +165,102 @@ class NovedadSerializer(serializers.ModelSerializer):
 
     def get_colaborador_nombre(self, obj):
         return f"{obj.colaborador.nombres} {obj.colaborador.apellidos}".strip()
+
+    def validate(self, attrs):
+        instancia = getattr(self, "instance", None)
+        periodo = attrs.get(
+            "periodo",
+            getattr(instancia, "periodo", None),
+        )
+        colaborador = attrs.get(
+            "colaborador",
+            getattr(instancia, "colaborador", None),
+        )
+        tipo_novedad = attrs.get(
+            "tipo_novedad",
+            getattr(instancia, "tipo_novedad", None),
+        )
+        fecha_inicio = attrs.get(
+            "fecha_inicio",
+            getattr(instancia, "fecha_inicio", None),
+        )
+        fecha_termino = attrs.get(
+            "fecha_termino",
+            getattr(instancia, "fecha_termino", None),
+        )
+        cantidad = attrs.get(
+            "cantidad",
+            getattr(instancia, "cantidad", None),
+        )
+        monto = attrs.get(
+            "monto",
+            getattr(instancia, "monto", None),
+        )
+        errores = {}
+
+        if (
+            periodo
+            and periodo.estado
+            != PeriodoLiquidacion.Estado.ABIERTO
+        ):
+            errores["periodo"] = (
+                "Solo se pueden registrar novedades en períodos abiertos."
+            )
+
+        if (
+            periodo
+            and colaborador
+            and periodo.sucursal_id != colaborador.sucursal_id
+        ):
+            errores["colaborador"] = (
+                "El colaborador debe pertenecer a la misma sucursal del período."
+            )
+
+        if colaborador and not colaborador.activo:
+            errores["colaborador"] = (
+                "Solo se pueden registrar novedades para colaboradores activos."
+            )
+
+        if tipo_novedad and not tipo_novedad.activo:
+            errores["tipo_novedad"] = (
+                "Solo se pueden utilizar tipos de novedad activos."
+            )
+
+        if (
+            fecha_inicio
+            and fecha_termino
+            and fecha_termino < fecha_inicio
+        ):
+            errores["fecha_termino"] = (
+                "La fecha de término no puede ser anterior a la fecha de inicio."
+            )
+
+        if tipo_novedad:
+            if (
+                tipo_novedad.unidad_medida
+                == TipoNovedad.UnidadMedida.PESOS
+                and monto is None
+            ):
+                errores["monto"] = (
+                    "Este tipo de novedad requiere un monto."
+                )
+
+            if (
+                tipo_novedad.unidad_medida
+                in {
+                    TipoNovedad.UnidadMedida.DIAS,
+                    TipoNovedad.UnidadMedida.MINUTOS,
+                }
+                and cantidad is None
+            ):
+                errores["cantidad"] = (
+                    "Este tipo de novedad requiere una cantidad."
+                )
+
+        if errores:
+            raise serializers.ValidationError(errores)
+
+        return attrs
 
     class Meta:
         model = Novedad

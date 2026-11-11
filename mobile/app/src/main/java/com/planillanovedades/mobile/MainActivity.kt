@@ -10,6 +10,7 @@ import com.planillanovedades.mobile.ui.PlanillaApp
 import com.planillanovedades.mobile.ui.auth.AuthViewModel
 import com.planillanovedades.mobile.ui.colaboradores.ColaboradoresViewModel
 import com.planillanovedades.mobile.ui.novedades.NovedadesViewModel
+import com.planillanovedades.mobile.ui.novedades.NuevaNovedadViewModel
 import com.planillanovedades.mobile.ui.theme.PlanillaNovedadesTheme
 
 class MainActivity : ComponentActivity() {
@@ -28,6 +29,11 @@ class MainActivity : ComponentActivity() {
         NovedadesViewModel.Factory(repository)
     }
 
+    private val nuevaNovedadViewModel: NuevaNovedadViewModel by viewModels {
+        val repository = (application as PlanillaApplication).nuevaNovedadRepository
+        NuevaNovedadViewModel.Factory(repository)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -39,15 +45,19 @@ class MainActivity : ComponentActivity() {
                     .collectAsStateWithLifecycle().value
                 val novedadesState = novedadesViewModel.uiState
                     .collectAsStateWithLifecycle().value
+                val nuevaNovedadState = nuevaNovedadViewModel.uiState
+                    .collectAsStateWithLifecycle().value
 
                 PlanillaApp(
                     state = authState,
                     colaboradoresState = colaboradoresState,
                     novedadesState = novedadesState,
+                    nuevaNovedadState = nuevaNovedadState,
                     onLogin = authViewModel::login,
                     onLogout = {
                         colaboradoresViewModel.clear()
                         novedadesViewModel.clear()
+                        nuevaNovedadViewModel.clear()
                         authViewModel.logout()
                     },
                     onDismissError = authViewModel::dismissError,
@@ -65,6 +75,20 @@ class MainActivity : ComponentActivity() {
                         novedadesViewModel.load(force = true)
                     },
                     onSearchNovedades = novedadesViewModel::updateQuery,
+                    onOpenNuevaNovedad = {
+                        nuevaNovedadViewModel.loadOptions()
+                    },
+                    onRetryNuevaNovedad = {
+                        nuevaNovedadViewModel.loadOptions(force = true)
+                    },
+                    onDismissNuevaNovedadError = {
+                        nuevaNovedadViewModel.dismissError()
+                    },
+                    onSubmitNuevaNovedad = nuevaNovedadViewModel::submit,
+                    onCreatedNovedad = {
+                        nuevaNovedadViewModel.clear()
+                        novedadesViewModel.load(force = true)
+                    },
                 )
             }
         }

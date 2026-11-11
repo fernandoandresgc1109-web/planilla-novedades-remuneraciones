@@ -104,6 +104,8 @@ El recurso de novedades no permite `DELETE`. Una novedad debe anularse para cons
 
 Para la presentación móvil, la respuesta de novedades incluye además campos de solo lectura: `periodo_descripcion`, `sucursal_nombre`, `colaborador_nombre`, `colaborador_rut` y `tipo_novedad_nombre`. Estos campos facilitan la lectura, pero no reemplazan los identificadores ni permiten cambiar las relaciones desde el teléfono.
 
+Al crear o modificar una novedad, el servidor comprueba que el período esté abierto, que el colaborador esté activo y pertenezca a la misma sucursal, que el tipo de novedad esté vigente, que las fechas sean coherentes y que exista monto o cantidad cuando la unidad de medida lo requiera. Estas reglas se aplican aunque la solicitud no provenga de la interfaz oficial.
+
 ## 7. Campos de trazabilidad
 
 Algunos campos son asignados automáticamente por el servidor y son de solo lectura.

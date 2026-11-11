@@ -157,6 +157,80 @@ class ApiRestTests(APITestCase):
             self.tipo_novedad.nombre,
         )
 
+    def test_api_rechaza_novedad_con_sucursal_incompatible(self):
+        otra_sucursal = Sucursal.objects.create(
+            codigo="SUC-OTRA",
+            nombre="Otra Sucursal Ficticia",
+        )
+        otro_colaborador = Colaborador.objects.create(
+            rut="TESTAPI00002",
+            nombres="Otra Persona",
+            apellidos="Ficticia",
+            sucursal=otra_sucursal,
+            afp=self.afp,
+            institucion_salud=self.institucion_salud,
+        )
+        self.autenticar()
+
+        respuesta = self.client.post(
+            reverse("api:novedad-list"),
+            {
+                "periodo": self.periodo.pk,
+                "colaborador": otro_colaborador.pk,
+                "tipo_novedad": self.tipo_novedad.pk,
+                "monto": "25000.00",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            respuesta.status_code,
+            status.HTTP_400_BAD_REQUEST,
+        )
+        self.assertIn("colaborador", respuesta.data)
+
+    def test_api_rechaza_novedad_en_periodo_cerrado(self):
+        self.periodo.estado = PeriodoLiquidacion.Estado.CERRADO
+        self.periodo.save(update_fields=["estado"])
+        self.autenticar()
+
+        respuesta = self.client.post(
+            reverse("api:novedad-list"),
+            {
+                "periodo": self.periodo.pk,
+                "colaborador": self.colaborador.pk,
+                "tipo_novedad": self.tipo_novedad.pk,
+                "monto": "25000.00",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            respuesta.status_code,
+            status.HTTP_400_BAD_REQUEST,
+        )
+        self.assertIn("periodo", respuesta.data)
+
+    def test_api_exige_monto_para_tipo_en_pesos(self):
+        self.autenticar()
+
+        respuesta = self.client.post(
+            reverse("api:novedad-list"),
+            {
+                "periodo": self.periodo.pk,
+                "colaborador": self.colaborador.pk,
+                "tipo_novedad": self.tipo_novedad.pk,
+                "observacion": "Registro sin monto.",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            respuesta.status_code,
+            status.HTTP_400_BAD_REQUEST,
+        )
+        self.assertIn("monto", respuesta.data)
+
     def test_crear_y_validar_novedad_registra_usuario(self):
         self.autenticar()
 
