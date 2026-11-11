@@ -14,6 +14,9 @@ Esta carpeta contiene el cliente Android nativo del sistema. La aplicación no r
 - Panel principal móvil con acceso a las funciones disponibles.
 - Listado de colaboradores filtrado por los permisos de Django.
 - Búsqueda local por nombre, RUT o sucursal.
+- Listado de novedades filtrado por los permisos de Django.
+- Búsqueda de novedades por persona, RUT, tipo, período, sucursal o estado.
+- Presentación del monto, cantidad, fechas, observación y estado del registro.
 - Consulta automática de todas las páginas de resultados.
 - Tiempo de espera ampliado para el inicio en frío de Render.
 
@@ -35,4 +38,4 @@ GitHub Actions ejecuta las pruebas unitarias y compila un APK de depuración en 
 
 La pantalla móvil envía el usuario y la contraseña al servidor Django. Si los datos son correctos, el servidor entrega un token. El teléfono guarda ese token cifrado y lo incluye en las siguientes solicitudes. Django sigue siendo responsable de comprobar el rol y la sucursal, por lo que la aplicación móvil no puede saltarse las reglas del sistema.
 
-Después de iniciar sesión, el panel permite consultar colaboradores. Android solicita la información a la API y Django devuelve únicamente los registros autorizados para el usuario. El buscador trabaja sobre la información recibida y el nombre de la sucursal se entrega como un dato de solo lectura.
+Después de iniciar sesión, el panel permite consultar colaboradores y novedades. Android solicita la información a la API y Django devuelve únicamente los registros autorizados para el usuario. Los buscadores trabajan sobre la información recibida y los nombres de la sucursal, la persona, el período y el tipo de novedad se entregan como datos de solo lectura para facilitar la comprensión.

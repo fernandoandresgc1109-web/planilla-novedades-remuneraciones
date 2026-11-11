@@ -24,3 +24,29 @@ data class ColaboradorMovil(
             .filter { it.isNotBlank() }
             .joinToString(" ")
 }
+
+data class NovedadMovil(
+    val id: Int,
+    val periodo: Int,
+    @SerializedName("periodo_descripcion")
+    val periodoDescripcion: String,
+    @SerializedName("sucursal_nombre")
+    val sucursalNombre: String,
+    val colaborador: Int,
+    @SerializedName("colaborador_nombre")
+    val colaboradorNombre: String,
+    @SerializedName("colaborador_rut")
+    val colaboradorRut: String,
+    @SerializedName("tipo_novedad")
+    val tipoNovedad: Int,
+    @SerializedName("tipo_novedad_nombre")
+    val tipoNovedadNombre: String,
+    @SerializedName("fecha_inicio")
+    val fechaInicio: String?,
+    @SerializedName("fecha_termino")
+    val fechaTermino: String?,
+    val cantidad: String?,
+    val monto: String?,
+    val observacion: String,
+    val estado: String,
+)

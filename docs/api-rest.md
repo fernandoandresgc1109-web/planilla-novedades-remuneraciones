@@ -102,6 +102,8 @@ La gestión de estados utiliza acciones controladas:
 
 El recurso de novedades no permite `DELETE`. Una novedad debe anularse para conservar su historial y auditoría.
 
+Para la presentación móvil, la respuesta de novedades incluye además campos de solo lectura: `periodo_descripcion`, `sucursal_nombre`, `colaborador_nombre`, `colaborador_rut` y `tipo_novedad_nombre`. Estos campos facilitan la lectura, pero no reemplazan los identificadores ni permiten cambiar las relaciones desde el teléfono.
+
 ## 7. Campos de trazabilidad
 
 Algunos campos son asignados automáticamente por el servidor y son de solo lectura.

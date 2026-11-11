@@ -139,13 +139,39 @@ class TipoNovedadSerializer(serializers.ModelSerializer):
 
 
 class NovedadSerializer(serializers.ModelSerializer):
+    periodo_descripcion = serializers.SerializerMethodField()
+    sucursal_nombre = serializers.CharField(
+        source="periodo.sucursal.nombre",
+        read_only=True,
+    )
+    colaborador_nombre = serializers.SerializerMethodField()
+    colaborador_rut = serializers.CharField(
+        source="colaborador.rut",
+        read_only=True,
+    )
+    tipo_novedad_nombre = serializers.CharField(
+        source="tipo_novedad.nombre",
+        read_only=True,
+    )
+
+    def get_periodo_descripcion(self, obj):
+        return f"{obj.periodo.mes:02d}/{obj.periodo.anio}"
+
+    def get_colaborador_nombre(self, obj):
+        return f"{obj.colaborador.nombres} {obj.colaborador.apellidos}".strip()
+
     class Meta:
         model = Novedad
         fields = (
             "id",
             "periodo",
+            "periodo_descripcion",
+            "sucursal_nombre",
             "colaborador",
+            "colaborador_nombre",
+            "colaborador_rut",
             "tipo_novedad",
+            "tipo_novedad_nombre",
             "fecha_inicio",
             "fecha_termino",
             "cantidad",
