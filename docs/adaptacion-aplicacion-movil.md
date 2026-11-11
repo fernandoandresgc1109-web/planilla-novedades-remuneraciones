@@ -139,3 +139,17 @@ El aislamiento multisucursal sigue en el servidor. Un operador solo recibe las n
 ### Explicación para la sustentación
 
 > El segundo módulo móvil consulta las novedades de remuneración. Android solicita los datos con el token y Django filtra primero la sucursal autorizada. El teléfono recibe nombres comprensibles para mostrar la persona, el período y el tipo de novedad, pero no decide los permisos. Así se mantiene una sola fuente de seguridad para la aplicación web y la móvil.
+
+## 11. Quinta etapa: registro de novedades
+
+Los usuarios con permiso de modificación pueden abrir un formulario móvil y registrar una novedad en estado borrador. El teléfono consulta los períodos, colaboradores y tipos disponibles mediante la API.
+
+La interfaz muestra únicamente períodos abiertos y registros activos. Cuando se selecciona un período, los colaboradores se limitan a la misma sucursal. El campo solicitado cambia según la unidad del tipo de novedad: monto para pesos o cantidad para días y minutos.
+
+Antes de guardar, Android realiza comprobaciones básicas para orientar al usuario. Después, Django valida nuevamente el rol, la sucursal, el estado del período, la vigencia del colaborador y del tipo, las fechas y los campos requeridos. Por esta razón, alterar la aplicación o enviar una solicitud manual no permite omitir las reglas del servidor.
+
+Contabilidad conserva el acceso de solo lectura y no recibe la opción de registro. Al guardar correctamente, la novedad queda como borrador y aparece en el listado móvil actualizado.
+
+### Explicación para la sustentación
+
+> El formulario móvil no guarda directamente en la base de datos. Envía la información a Django mediante la API. El servidor comprueba otra vez el usuario, la sucursal, el período y los datos obligatorios. Solo después crea la novedad como borrador. Esto evita confiar únicamente en las validaciones visibles del teléfono.
