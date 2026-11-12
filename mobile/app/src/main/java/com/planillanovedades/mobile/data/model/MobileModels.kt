@@ -64,10 +64,33 @@ data class PeriodoMovil(
     val sucursalNombre: String,
     val anio: Int,
     val mes: Int,
+    @SerializedName("fecha_inicio")
+    val fechaInicio: String,
+    @SerializedName("fecha_cierre")
+    val fechaCierre: String?,
     val estado: String,
 ) {
     val descripcion: String
         get() = "%02d/%d · %s".format(mes, anio, sucursalNombre)
+
+    val nombreMes: String
+        get() = listOf(
+            "Enero",
+            "Febrero",
+            "Marzo",
+            "Abril",
+            "Mayo",
+            "Junio",
+            "Julio",
+            "Agosto",
+            "Septiembre",
+            "Octubre",
+            "Noviembre",
+            "Diciembre",
+        ).getOrElse(mes - 1) { "Mes $mes" }
+
+    val fechaCierreLegible: String?
+        get() = fechaCierre?.substringBefore("T")
 }
 
 data class TipoNovedadMovil(

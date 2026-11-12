@@ -64,8 +64,26 @@ private class FakeNuevaNovedadApiService : ApiService {
         next = null,
         previous = null,
         results = listOf(
-            PeriodoMovil(1, 1, "Norte", 2026, 11, "ABIERTO"),
-            PeriodoMovil(2, 1, "Norte", 2026, 10, "CERRADO"),
+            PeriodoMovil(
+                1,
+                1,
+                "Norte",
+                2026,
+                11,
+                "2026-11-01",
+                null,
+                "ABIERTO",
+            ),
+            PeriodoMovil(
+                2,
+                1,
+                "Norte",
+                2026,
+                10,
+                "2026-10-01",
+                "2026-10-31T18:00:00Z",
+                "CERRADO",
+            ),
         ),
     )
 

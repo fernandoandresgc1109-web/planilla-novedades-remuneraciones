@@ -7,6 +7,7 @@ import com.planillanovedades.mobile.data.repository.AuthRepository
 import com.planillanovedades.mobile.data.repository.ColaboradorRepository
 import com.planillanovedades.mobile.data.repository.NovedadRepository
 import com.planillanovedades.mobile.data.repository.NuevaNovedadRepository
+import com.planillanovedades.mobile.data.repository.PeriodoRepository
 import com.planillanovedades.mobile.data.session.SecureTokenStore
 import java.util.concurrent.TimeUnit
 import okhttp3.OkHttpClient
@@ -24,6 +25,9 @@ class PlanillaApplication : Application() {
         private set
 
     lateinit var nuevaNovedadRepository: NuevaNovedadRepository
+        private set
+
+    lateinit var periodoRepository: PeriodoRepository
         private set
 
     override fun onCreate() {
@@ -48,5 +52,6 @@ class PlanillaApplication : Application() {
         colaboradorRepository = ColaboradorRepository(apiService)
         novedadRepository = NovedadRepository(apiService)
         nuevaNovedadRepository = NuevaNovedadRepository(apiService)
+        periodoRepository = PeriodoRepository(apiService)
     }
 }

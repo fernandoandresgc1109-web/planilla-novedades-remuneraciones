@@ -11,6 +11,7 @@ import com.planillanovedades.mobile.ui.auth.AuthViewModel
 import com.planillanovedades.mobile.ui.colaboradores.ColaboradoresViewModel
 import com.planillanovedades.mobile.ui.novedades.NovedadesViewModel
 import com.planillanovedades.mobile.ui.novedades.NuevaNovedadViewModel
+import com.planillanovedades.mobile.ui.periodos.PeriodosViewModel
 import com.planillanovedades.mobile.ui.theme.PlanillaNovedadesTheme
 
 class MainActivity : ComponentActivity() {
@@ -34,6 +35,11 @@ class MainActivity : ComponentActivity() {
         NuevaNovedadViewModel.Factory(repository)
     }
 
+    private val periodosViewModel: PeriodosViewModel by viewModels {
+        val repository = (application as PlanillaApplication).periodoRepository
+        PeriodosViewModel.Factory(repository)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -47,17 +53,21 @@ class MainActivity : ComponentActivity() {
                     .collectAsStateWithLifecycle().value
                 val nuevaNovedadState = nuevaNovedadViewModel.uiState
                     .collectAsStateWithLifecycle().value
+                val periodosState = periodosViewModel.uiState
+                    .collectAsStateWithLifecycle().value
 
                 PlanillaApp(
                     state = authState,
                     colaboradoresState = colaboradoresState,
                     novedadesState = novedadesState,
                     nuevaNovedadState = nuevaNovedadState,
+                    periodosState = periodosState,
                     onLogin = authViewModel::login,
                     onLogout = {
                         colaboradoresViewModel.clear()
                         novedadesViewModel.clear()
                         nuevaNovedadViewModel.clear()
+                        periodosViewModel.clear()
                         authViewModel.logout()
                     },
                     onDismissError = authViewModel::dismissError,
@@ -94,6 +104,13 @@ class MainActivity : ComponentActivity() {
                         nuevaNovedadViewModel.clear()
                         novedadesViewModel.load(force = true)
                     },
+                    onOpenPeriodos = {
+                        periodosViewModel.load()
+                    },
+                    onRefreshPeriodos = {
+                        periodosViewModel.load(force = true)
+                    },
+                    onSearchPeriodos = periodosViewModel::updateQuery,
                 )
             }
         }
