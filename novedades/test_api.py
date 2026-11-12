@@ -148,6 +148,8 @@ class ApiRestTests(APITestCase):
             registro["colaborador_nombre"],
             "Nombre API Apellido Ficticio",
         )
+        self.assertTrue(registro["puede_validar"])
+        self.assertTrue(registro["puede_anular"])
         self.assertEqual(
             registro["colaborador_rut"],
             self.colaborador.rut,
@@ -155,6 +157,51 @@ class ApiRestTests(APITestCase):
         self.assertEqual(
             registro["tipo_novedad_nombre"],
             self.tipo_novedad.nombre,
+        )
+
+    def test_acciones_actualizan_permisos_de_estado(self):
+        novedad = Novedad.objects.create(
+            periodo=self.periodo,
+            colaborador=self.colaborador,
+            tipo_novedad=self.tipo_novedad,
+            monto="45000.00",
+            observacion="Prueba ficticia de acciones móviles.",
+            creado_por=self.usuario,
+        )
+        self.autenticar()
+
+        respuesta_validar = self.client.post(
+            reverse("api:novedad-validar", args=[novedad.pk]),
+            {},
+            format="json",
+        )
+
+        self.assertEqual(
+            respuesta_validar.status_code,
+            status.HTTP_200_OK,
+        )
+        self.assertFalse(respuesta_validar.data["puede_validar"])
+        self.assertTrue(respuesta_validar.data["puede_anular"])
+
+        respuesta_anular = self.client.post(
+            reverse("api:novedad-anular", args=[novedad.pk]),
+            {
+                "motivo_anulacion": (
+                    "Registro ficticio anulado desde la prueba móvil."
+                )
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            respuesta_anular.status_code,
+            status.HTTP_200_OK,
+        )
+        self.assertFalse(respuesta_anular.data["puede_validar"])
+        self.assertFalse(respuesta_anular.data["puede_anular"])
+        self.assertEqual(
+            respuesta_anular.data["motivo_anulacion"],
+            "Registro ficticio anulado desde la prueba móvil.",
         )
 
     def test_api_rechaza_novedad_con_sucursal_incompatible(self):

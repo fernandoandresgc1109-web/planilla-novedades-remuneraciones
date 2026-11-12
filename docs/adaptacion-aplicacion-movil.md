@@ -153,3 +153,15 @@ Contabilidad conserva el acceso de solo lectura y no recibe la opción de regist
 ### Explicación para la sustentación
 
 > El formulario móvil no guarda directamente en la base de datos. Envía la información a Django mediante la API. El servidor comprueba otra vez el usuario, la sucursal, el período y los datos obligatorios. Solo después crea la novedad como borrador. Esto evita confiar únicamente en las validaciones visibles del teléfono.
+
+## 12. Sexta etapa: validación y anulación móvil
+
+El listado móvil permite validar una novedad en borrador y anular una novedad en un estado permitido. Antes de validar se muestra una confirmación, porque el registro dejará de ser editable. Para anular se exige un motivo de 10 a 500 caracteres que queda visible en el historial.
+
+La API informa mediante campos de solo lectura si cada novedad puede validarse o anularse. Android utiliza esa información para presentar los botones, pero Django vuelve a comprobar el usuario, el rol, la sucursal, el período y la transición solicitada. Contabilidad conserva el acceso de solo lectura y no recibe botones de modificación.
+
+Cuando la operación termina, la tarjeta se actualiza inmediatamente con el nuevo estado. Los usuarios, las fechas y el motivo se conservan en el servidor como evidencia de auditoría.
+
+### Explicación para la sustentación
+
+> Desde Android se puede validar o anular una novedad, pero el teléfono no decide por sí solo. Django indica qué acciones están disponibles y vuelve a revisar los permisos antes de cambiar el estado. La anulación exige un motivo y el sistema conserva quién realizó la acción y cuándo, lo que protege la trazabilidad del proceso.

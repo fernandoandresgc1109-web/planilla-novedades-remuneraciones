@@ -1,6 +1,7 @@
 package com.planillanovedades.mobile.data.repository
 
 import com.planillanovedades.mobile.data.model.NovedadMovil
+import com.planillanovedades.mobile.data.model.AnularNovedadRequest
 import com.planillanovedades.mobile.data.remote.ApiService
 import java.io.IOException
 import kotlinx.coroutines.CancellationException
@@ -13,6 +14,11 @@ sealed interface NovedadesResult {
     ) : NovedadesResult
 
     data class Error(val message: String) : NovedadesResult
+}
+
+sealed interface AccionNovedadResult {
+    data class Success(val novedad: NovedadMovil) : AccionNovedadResult
+    data class Error(val message: String) : AccionNovedadResult
 }
 
 class NovedadRepository(
@@ -54,6 +60,47 @@ class NovedadRepository(
         } catch (_: Exception) {
             NovedadesResult.Error(
                 "Ocurrió un error inesperado al consultar novedades.",
+            )
+        }
+    }
+
+    suspend fun validar(id: Int): AccionNovedadResult = ejecutarAccion {
+        apiService.validarNovedad(id)
+    }
+
+    suspend fun anular(
+        id: Int,
+        motivo: String,
+    ): AccionNovedadResult = ejecutarAccion {
+        apiService.anularNovedad(
+            id,
+            AnularNovedadRequest(motivoAnulacion = motivo.trim()),
+        )
+    }
+
+    private suspend fun ejecutarAccion(
+        accion: suspend () -> NovedadMovil,
+    ): AccionNovedadResult {
+        return try {
+            AccionNovedadResult.Success(accion())
+        } catch (error: HttpException) {
+            AccionNovedadResult.Error(
+                when (error.code()) {
+                    400 -> "La novedad cambió o no cumple las condiciones para esta acción."
+                    401, 403 -> "Tu sesión no tiene permiso para modificar esta novedad."
+                    404 -> "La novedad ya no está disponible."
+                    else -> "El servidor no pudo actualizar la novedad."
+                },
+            )
+        } catch (_: IOException) {
+            AccionNovedadResult.Error(
+                "No fue posible conectarse. Revisa Internet e inténtalo nuevamente.",
+            )
+        } catch (error: CancellationException) {
+            throw error
+        } catch (_: Exception) {
+            AccionNovedadResult.Error(
+                "Ocurrió un error inesperado al actualizar la novedad.",
             )
         }
     }

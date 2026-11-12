@@ -1,6 +1,7 @@
 package com.planillanovedades.mobile.data.remote
 
 import com.planillanovedades.mobile.data.model.ColaboradorMovil
+import com.planillanovedades.mobile.data.model.AnularNovedadRequest
 import com.planillanovedades.mobile.data.model.LoginRequest
 import com.planillanovedades.mobile.data.model.LoginResponse
 import com.planillanovedades.mobile.data.model.NovedadMovil
@@ -13,6 +14,7 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiService {
@@ -48,5 +50,16 @@ interface ApiService {
     @POST("api/novedades/")
     suspend fun crearNovedad(
         @Body request: NuevaNovedadRequest,
+    ): NovedadMovil
+
+    @POST("api/novedades/{id}/validar/")
+    suspend fun validarNovedad(
+        @Path("id") id: Int,
+    ): NovedadMovil
+
+    @POST("api/novedades/{id}/anular/")
+    suspend fun anularNovedad(
+        @Path("id") id: Int,
+        @Body request: AnularNovedadRequest,
     ): NovedadMovil
 }

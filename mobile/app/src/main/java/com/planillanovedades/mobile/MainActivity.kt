@@ -75,6 +75,11 @@ class MainActivity : ComponentActivity() {
                         novedadesViewModel.load(force = true)
                     },
                     onSearchNovedades = novedadesViewModel::updateQuery,
+                    onValidarNovedad = novedadesViewModel::validar,
+                    onAnularNovedad = novedadesViewModel::anular,
+                    onDismissNovedadFeedback = {
+                        novedadesViewModel.dismissActionFeedback()
+                    },
                     onOpenNuevaNovedad = {
                         nuevaNovedadViewModel.loadOptions()
                     },
