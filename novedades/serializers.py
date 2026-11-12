@@ -159,6 +159,8 @@ class NovedadSerializer(serializers.ModelSerializer):
         source="tipo_novedad.nombre",
         read_only=True,
     )
+    puede_validar = serializers.BooleanField(read_only=True)
+    puede_anular = serializers.BooleanField(read_only=True)
 
     def get_periodo_descripcion(self, obj):
         return f"{obj.periodo.mes:02d}/{obj.periodo.anio}"
@@ -280,6 +282,8 @@ class NovedadSerializer(serializers.ModelSerializer):
             "monto",
             "observacion",
             "estado",
+            "puede_validar",
+            "puede_anular",
             "creado_por",
             "validado_por",
             "validado_en",

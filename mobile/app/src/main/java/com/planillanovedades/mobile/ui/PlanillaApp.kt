@@ -13,11 +13,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -71,6 +73,9 @@ fun PlanillaApp(
     onOpenNovedades: () -> Unit,
     onRefreshNovedades: () -> Unit,
     onSearchNovedades: (String) -> Unit,
+    onValidarNovedad: (Int) -> Unit,
+    onAnularNovedad: (Int, String) -> Unit,
+    onDismissNovedadFeedback: () -> Unit,
     onOpenNuevaNovedad: () -> Unit,
     onRetryNuevaNovedad: () -> Unit,
     onDismissNuevaNovedadError: () -> Unit,
@@ -102,6 +107,9 @@ fun PlanillaApp(
             onBack = { destino = DESTINO_INICIO },
             onRefresh = onRefreshNovedades,
             onSearch = onSearchNovedades,
+            onValidate = onValidarNovedad,
+            onAnnul = onAnularNovedad,
+            onDismissFeedback = onDismissNovedadFeedback,
         )
         destino == DESTINO_NUEVA_NOVEDAD -> NuevaNovedadScreen(
             user = state.user,
@@ -614,8 +622,86 @@ private fun NovedadesScreen(
     onBack: () -> Unit,
     onRefresh: () -> Unit,
     onSearch: (String) -> Unit,
+    onValidate: (Int) -> Unit,
+    onAnnul: (Int, String) -> Unit,
+    onDismissFeedback: () -> Unit,
 ) {
     BackHandler(onBack = onBack)
+    var validarId by rememberSaveable { mutableStateOf<Int?>(null) }
+    var anularId by rememberSaveable { mutableStateOf<Int?>(null) }
+    var motivoAnulacion by rememberSaveable { mutableStateOf("") }
+
+    validarId?.let { id ->
+        AlertDialog(
+            onDismissRequest = { validarId = null },
+            title = { Text("Validar novedad") },
+            text = {
+                Text("La novedad quedará confirmada y ya no podrá editarse.")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        validarId = null
+                        onValidate(id)
+                    },
+                ) {
+                    Text("Validar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { validarId = null }) {
+                    Text("Cancelar")
+                }
+            },
+        )
+    }
+
+    anularId?.let { id ->
+        AlertDialog(
+            onDismissRequest = {
+                anularId = null
+                motivoAnulacion = ""
+            },
+            title = { Text("Anular novedad") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Escribe el motivo. Esta acción quedará registrada.")
+                    OutlinedTextField(
+                        value = motivoAnulacion,
+                        onValueChange = { motivoAnulacion = it.take(500) },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Motivo de anulación") },
+                        supportingText = {
+                            Text("${motivoAnulacion.trim().length}/500 · mínimo 10")
+                        },
+                        minLines = 3,
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    enabled = motivoAnulacion.trim().length in 10..500,
+                    onClick = {
+                        onAnnul(id, motivoAnulacion)
+                        anularId = null
+                        motivoAnulacion = ""
+                    },
+                ) {
+                    Text("Anular")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        anularId = null
+                        motivoAnulacion = ""
+                    },
+                ) {
+                    Text("Cancelar")
+                }
+            },
+        )
+    }
 
     val filtradas = remember(state.query, state.novedades) {
         val texto = state.query.trim()
@@ -660,6 +746,36 @@ private fun NovedadesScreen(
             label = { Text("Buscar persona, RUT, tipo, período o sucursal") },
             singleLine = true,
         )
+        (state.actionMessage ?: state.actionError)?.let { feedback ->
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium,
+                color = if (state.actionError == null) {
+                    MaterialTheme.colorScheme.primaryContainer
+                } else {
+                    MaterialTheme.colorScheme.errorContainer
+                },
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text(
+                        text = feedback,
+                        modifier = Modifier.weight(1f),
+                        color = if (state.actionError == null) {
+                            MaterialTheme.colorScheme.onPrimaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.onErrorContainer
+                        },
+                    )
+                    TextButton(onClick = onDismissFeedback) {
+                        Text("Cerrar")
+                    }
+                }
+            }
+        }
 
         when {
             state.loading -> Box(
@@ -724,7 +840,17 @@ private fun NovedadesScreen(
                             items = filtradas,
                             key = { it.id },
                         ) { novedad ->
-                            NovedadCard(novedad)
+                            NovedadCard(
+                                novedad = novedad,
+                                canModify = user.puedeModificar,
+                                busy = state.workingId == novedad.id,
+                                actionsEnabled = state.workingId == null,
+                                onValidate = { validarId = novedad.id },
+                                onAnnul = {
+                                    motivoAnulacion = ""
+                                    anularId = novedad.id
+                                },
+                            )
                         }
                     }
                 }
@@ -734,7 +860,14 @@ private fun NovedadesScreen(
 }
 
 @Composable
-private fun NovedadCard(novedad: NovedadMovil) {
+private fun NovedadCard(
+    novedad: NovedadMovil,
+    canModify: Boolean,
+    busy: Boolean,
+    actionsEnabled: Boolean,
+    onValidate: () -> Unit,
+    onAnnul: () -> Unit,
+) {
     val estadoContainer = when (novedad.estado) {
         "VALIDADA" -> MaterialTheme.colorScheme.primaryContainer
         "ANULADA" -> MaterialTheme.colorScheme.errorContainer
@@ -811,6 +944,50 @@ private fun NovedadCard(novedad: NovedadMovil) {
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = estadoContent,
+                )
+            }
+            if (canModify && (novedad.puedeValidar || novedad.puedeAnular)) {
+                HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                if (busy) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp,
+                        )
+                        Text("Actualizando novedad…")
+                    }
+                } else {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (novedad.puedeValidar) {
+                            Button(
+                                enabled = actionsEnabled,
+                                onClick = onValidate,
+                            ) {
+                                Text("Validar")
+                            }
+                        }
+                        if (novedad.puedeAnular) {
+                            OutlinedButton(
+                                enabled = actionsEnabled,
+                                onClick = onAnnul,
+                            ) {
+                                Text("Anular")
+                            }
+                        }
+                    }
+                }
+            }
+            if (
+                novedad.estado == "ANULADA" &&
+                novedad.motivoAnulacion.isNotBlank()
+            ) {
+                Text(
+                    text = "Motivo: ${novedad.motivoAnulacion}",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
                 )
             }
         }

@@ -1,6 +1,7 @@
 package com.planillanovedades.mobile.data.repository
 
 import com.planillanovedades.mobile.data.model.ColaboradorMovil
+import com.planillanovedades.mobile.data.model.AnularNovedadRequest
 import com.planillanovedades.mobile.data.model.LoginRequest
 import com.planillanovedades.mobile.data.model.LoginResponse
 import com.planillanovedades.mobile.data.model.NovedadMovil
@@ -35,10 +36,37 @@ class NovedadRepositoryTest {
             result.novedades.first().tipoNovedadNombre,
         )
     }
+
+    @Test
+    fun `validar devuelve la novedad actualizada`() = runBlocking {
+        val repository = NovedadRepository(FakeNovedadesApiService())
+
+        val result = repository.validar(1)
+
+        assertTrue(result is AccionNovedadResult.Success)
+        result as AccionNovedadResult.Success
+        assertEquals("VALIDADA", result.novedad.estado)
+        assertEquals(false, result.novedad.puedeValidar)
+        assertEquals(true, result.novedad.puedeAnular)
+    }
+
+    @Test
+    fun `anular envia el motivo limpio`() = runBlocking {
+        val api = FakeNovedadesApiService()
+        val repository = NovedadRepository(api)
+
+        val result = repository.anular(1, "  Motivo ficticio válido  ")
+
+        assertTrue(result is AccionNovedadResult.Success)
+        result as AccionNovedadResult.Success
+        assertEquals("ANULADA", result.novedad.estado)
+        assertEquals("Motivo ficticio válido", api.ultimoMotivo)
+    }
 }
 
 private class FakeNovedadesApiService : ApiService {
     val paginasConsultadas = mutableListOf<Int>()
+    var ultimoMotivo: String? = null
 
     override suspend fun novedades(
         page: Int,
@@ -60,6 +88,8 @@ private class FakeNovedadesApiService : ApiService {
             monto = "45000.00",
             observacion = "Prueba móvil",
             estado = "BORRADOR",
+            puedeValidar = true,
+            puedeAnular = true,
         )
         return PaginatedResponse(
             count = 2,
@@ -100,6 +130,26 @@ private class FakeNovedadesApiService : ApiService {
         request: NuevaNovedadRequest,
     ): NovedadMovil = error("No utilizado en estas pruebas")
 
+    override suspend fun validarNovedad(id: Int): NovedadMovil =
+        novedadParaAccion(id).copy(
+            estado = "VALIDADA",
+            puedeValidar = false,
+            puedeAnular = true,
+        )
+
+    override suspend fun anularNovedad(
+        id: Int,
+        request: AnularNovedadRequest,
+    ): NovedadMovil {
+        ultimoMotivo = request.motivoAnulacion
+        return novedadParaAccion(id).copy(
+            estado = "ANULADA",
+            puedeValidar = false,
+            puedeAnular = false,
+            motivoAnulacion = request.motivoAnulacion,
+        )
+    }
+
     override suspend fun login(request: LoginRequest): LoginResponse =
         LoginResponse(token = "", usuario = usuarioPrueba())
 
@@ -117,5 +167,25 @@ private class FakeNovedadesApiService : ApiService {
         accesoGlobal = false,
         puedeModificar = true,
         puedeExportar = false,
+    )
+
+    private fun novedadParaAccion(id: Int) = NovedadMovil(
+        id = id,
+        periodo = 1,
+        periodoDescripcion = "11/2026",
+        sucursalNombre = "Sucursal Norte",
+        colaborador = 1,
+        colaboradorNombre = "Persona 1",
+        colaboradorRut = "RUT-1",
+        tipoNovedad = 1,
+        tipoNovedadNombre = "Bono de producción",
+        fechaInicio = null,
+        fechaTermino = null,
+        cantidad = null,
+        monto = "45000.00",
+        observacion = "Prueba móvil",
+        estado = "BORRADOR",
+        puedeValidar = true,
+        puedeAnular = true,
     )
 }

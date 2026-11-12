@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.planillanovedades.mobile.data.model.NovedadMovil
+import com.planillanovedades.mobile.data.repository.AccionNovedadResult
 import com.planillanovedades.mobile.data.repository.NovedadRepository
 import com.planillanovedades.mobile.data.repository.NovedadesResult
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,6 +20,9 @@ data class NovedadesUiState(
     val total: Int = 0,
     val query: String = "",
     val errorMessage: String? = null,
+    val workingId: Int? = null,
+    val actionMessage: String? = null,
+    val actionError: String? = null,
 )
 
 class NovedadesViewModel(
@@ -59,6 +63,82 @@ class NovedadesViewModel(
 
     fun updateQuery(query: String) {
         _uiState.update { it.copy(query = query) }
+    }
+
+    fun validar(id: Int) {
+        ejecutarAccion(
+            id = id,
+            successMessage = "Novedad validada correctamente.",
+        ) {
+            repository.validar(id)
+        }
+    }
+
+    fun anular(id: Int, motivo: String) {
+        val motivoLimpio = motivo.trim()
+        if (motivoLimpio.length !in 10..500) {
+            _uiState.update {
+                it.copy(
+                    actionError = "El motivo debe tener entre 10 y 500 caracteres.",
+                    actionMessage = null,
+                )
+            }
+            return
+        }
+
+        ejecutarAccion(
+            id = id,
+            successMessage = "Novedad anulada correctamente.",
+        ) {
+            repository.anular(id, motivoLimpio)
+        }
+    }
+
+    fun dismissActionFeedback() {
+        _uiState.update {
+            it.copy(actionMessage = null, actionError = null)
+        }
+    }
+
+    private fun ejecutarAccion(
+        id: Int,
+        successMessage: String,
+        action: suspend () -> AccionNovedadResult,
+    ) {
+        if (_uiState.value.workingId != null) return
+
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(
+                    workingId = id,
+                    actionMessage = null,
+                    actionError = null,
+                )
+            }
+
+            when (val result = action()) {
+                is AccionNovedadResult.Success -> _uiState.update { state ->
+                    state.copy(
+                        workingId = null,
+                        novedades = state.novedades.map { novedad ->
+                            if (novedad.id == result.novedad.id) {
+                                result.novedad
+                            } else {
+                                novedad
+                            }
+                        },
+                        actionMessage = successMessage,
+                    )
+                }
+
+                is AccionNovedadResult.Error -> _uiState.update {
+                    it.copy(
+                        workingId = null,
+                        actionError = result.message,
+                    )
+                }
+            }
+        }
     }
 
     fun clear() {

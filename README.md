@@ -141,7 +141,7 @@ La aplicación web se conservará como sistema central y panel administrativo. L
 
 La API incorpora autenticación por token para Android, consulta del usuario activo y cierre de sesión móvil. El cliente Android nativo incluye inicio de sesión, conservación cifrada del token, recuperación de sesión y visualización del rol, la sucursal y los permisos. La autenticación por sesión de la interfaz web se mantiene sin cambios.
 
-El panel móvil permite consultar colaboradores y novedades, y registrar novedades en borrador cuando el perfil tiene permiso de modificación. La aplicación recorre la paginación de la API, ofrece búsqueda local y muestra únicamente los datos que Django autoriza según el rol y la sede. El formulario utiliza períodos abiertos, colaboradores activos de la misma sucursal y tipos vigentes; Django valida nuevamente todos los datos antes de guardarlos.
+El panel móvil permite consultar colaboradores y novedades, registrar novedades en borrador y gestionar sus estados cuando el perfil tiene permiso de modificación. La aplicación recorre la paginación de la API, ofrece búsqueda local y muestra únicamente los datos que Django autoriza según el rol y la sede. El formulario utiliza períodos abiertos, colaboradores activos de la misma sucursal y tipos vigentes; Django valida nuevamente todos los datos antes de guardarlos. La validación y la anulación requieren confirmación, y el motivo de anulación queda registrado para auditoría.
 
 ## Seguridad implementada
 
@@ -213,6 +213,7 @@ Los archivos reales utilizados para analizar el proceso no se incluyen en el rep
 - [x] Panel móvil y consulta de colaboradores.
 - [x] Consulta móvil de novedades y sus estados.
 - [x] Registro móvil de novedades en borrador.
+- [x] Validación y anulación de novedades desde Android.
 - [ ] Pruebas y demostración de la aplicación móvil.
 - [ ] Presentación y entrega final.
 
@@ -240,6 +241,7 @@ Los archivos reales utilizados para analizar el proceso no se incluyen en el rep
 | 10-11-2026 | Panel móvil y consulta de colaboradores | Se comprobó el inicio, recuperación y cierre de sesión en el emulador; se agregó el panel principal, el listado paginado de colaboradores, la búsqueda por nombre, RUT o sucursal, el nombre legible de la sede y una espera mayor para el inicio en frío de Render. |
 | 11-11-2026 | Consulta móvil de novedades | Se agregó el listado paginado de novedades, la búsqueda por colaborador, RUT, tipo, período, sucursal o estado, y la presentación de datos legibles sin trasladar al teléfono las reglas de permisos e aislamiento aplicadas por Django. |
 | 11-11-2026 | Registro móvil de novedades | Se incorporó un formulario Android para usuarios con permiso de modificación; se cargan períodos abiertos, colaboradores activos y tipos vigentes, se filtran las personas por sucursal y Django valida nuevamente la integridad, el rol y los campos requeridos antes de guardar el borrador. |
+| 12-11-2026 | Gestión móvil de estados | Se conectaron las acciones de validación y anulación con confirmación, motivo obligatorio y actualización inmediata del listado; Django continúa comprobando el rol, la sucursal y las transiciones permitidas, y conserva la auditoría de cada acción. |
 
 ## Consideraciones de privacidad
 

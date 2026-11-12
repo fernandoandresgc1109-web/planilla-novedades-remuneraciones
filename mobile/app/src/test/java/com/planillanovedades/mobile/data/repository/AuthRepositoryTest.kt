@@ -1,6 +1,7 @@
 package com.planillanovedades.mobile.data.repository
 
 import com.planillanovedades.mobile.data.model.ColaboradorMovil
+import com.planillanovedades.mobile.data.model.AnularNovedadRequest
 import com.planillanovedades.mobile.data.model.LoginRequest
 import com.planillanovedades.mobile.data.model.LoginResponse
 import com.planillanovedades.mobile.data.model.NovedadMovil
@@ -128,5 +129,13 @@ private class FakeApiService : ApiService {
 
     override suspend fun crearNovedad(
         request: NuevaNovedadRequest,
+    ): NovedadMovil = error("No utilizado en estas pruebas")
+
+    override suspend fun validarNovedad(id: Int): NovedadMovil =
+        error("No utilizado en estas pruebas")
+
+    override suspend fun anularNovedad(
+        id: Int,
+        request: AnularNovedadRequest,
     ): NovedadMovil = error("No utilizado en estas pruebas")
 }

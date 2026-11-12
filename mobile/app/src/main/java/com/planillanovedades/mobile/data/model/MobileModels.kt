@@ -49,6 +49,12 @@ data class NovedadMovil(
     val monto: String?,
     val observacion: String,
     val estado: String,
+    @SerializedName("puede_validar")
+    val puedeValidar: Boolean,
+    @SerializedName("puede_anular")
+    val puedeAnular: Boolean,
+    @SerializedName("motivo_anulacion")
+    val motivoAnulacion: String = "",
 )
 
 data class PeriodoMovil(
@@ -86,4 +92,9 @@ data class NuevaNovedadRequest(
     val cantidad: String?,
     val monto: String?,
     val observacion: String,
+)
+
+data class AnularNovedadRequest(
+    @SerializedName("motivo_anulacion")
+    val motivoAnulacion: String,
 )
