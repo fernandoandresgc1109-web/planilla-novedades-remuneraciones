@@ -23,6 +23,8 @@ Esta carpeta contiene el cliente Android nativo del sistema. La aplicación no r
 - Validación de novedades en borrador con confirmación previa.
 - Anulación de novedades con motivo obligatorio de 10 a 500 caracteres.
 - Actualización inmediata del estado y presentación del motivo registrado.
+- Consulta de períodos con mes, año, sucursal, fechas y estado.
+- Búsqueda de períodos y conteo de los registros abiertos.
 - Consulta automática de todas las páginas de resultados.
 - Tiempo de espera ampliado para el inicio en frío de Render.
 
@@ -44,4 +46,4 @@ GitHub Actions ejecuta las pruebas unitarias y compila un APK de depuración en 
 
 La pantalla móvil envía el usuario y la contraseña al servidor Django. Si los datos son correctos, el servidor entrega un token. El teléfono guarda ese token cifrado y lo incluye en las siguientes solicitudes. Django sigue siendo responsable de comprobar el rol y la sucursal, por lo que la aplicación móvil no puede saltarse las reglas del sistema.
 
-Después de iniciar sesión, el panel permite consultar colaboradores y novedades. Los usuarios con permiso de modificación también pueden registrar, validar y anular novedades. Android muestra únicamente las acciones disponibles, pide confirmación y solicita un motivo al anular. Django vuelve a comprobar el rol, la sucursal, el período y el estado antes de aceptar cualquier cambio.
+Después de iniciar sesión, el panel permite consultar colaboradores, períodos y novedades. Los usuarios con permiso de modificación también pueden registrar, validar y anular novedades. Android muestra únicamente las acciones disponibles, pide confirmación y solicita un motivo al anular. Django vuelve a comprobar el rol, la sucursal, el período y el estado antes de aceptar cualquier cambio.

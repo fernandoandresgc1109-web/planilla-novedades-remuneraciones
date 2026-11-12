@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.planillanovedades.mobile.data.model.ColaboradorMovil
 import com.planillanovedades.mobile.data.model.NovedadMovil
+import com.planillanovedades.mobile.data.model.PeriodoMovil
 import com.planillanovedades.mobile.data.model.UsuarioMovil
 import com.planillanovedades.mobile.ui.auth.AuthUiState
 import com.planillanovedades.mobile.ui.colaboradores.ColaboradoresUiState
@@ -52,11 +53,13 @@ import com.planillanovedades.mobile.ui.novedades.NovedadesUiState
 import com.planillanovedades.mobile.ui.novedades.NuevaNovedadFormData
 import com.planillanovedades.mobile.ui.novedades.NuevaNovedadScreen
 import com.planillanovedades.mobile.ui.novedades.NuevaNovedadUiState
+import com.planillanovedades.mobile.ui.periodos.PeriodosUiState
 
 private const val DESTINO_INICIO = "inicio"
 private const val DESTINO_COLABORADORES = "colaboradores"
 private const val DESTINO_NOVEDADES = "novedades"
 private const val DESTINO_NUEVA_NOVEDAD = "nueva_novedad"
+private const val DESTINO_PERIODOS = "periodos"
 
 @Composable
 fun PlanillaApp(
@@ -64,6 +67,7 @@ fun PlanillaApp(
     colaboradoresState: ColaboradoresUiState,
     novedadesState: NovedadesUiState,
     nuevaNovedadState: NuevaNovedadUiState,
+    periodosState: PeriodosUiState,
     onLogin: (String, String) -> Unit,
     onLogout: () -> Unit,
     onDismissError: () -> Unit,
@@ -81,6 +85,9 @@ fun PlanillaApp(
     onDismissNuevaNovedadError: () -> Unit,
     onSubmitNuevaNovedad: (NuevaNovedadFormData) -> Unit,
     onCreatedNovedad: () -> Unit,
+    onOpenPeriodos: () -> Unit,
+    onRefreshPeriodos: () -> Unit,
+    onSearchPeriodos: (String) -> Unit,
 ) {
     var destino by rememberSaveable(state.user?.id) {
         mutableStateOf(DESTINO_INICIO)
@@ -123,6 +130,13 @@ fun PlanillaApp(
                 onCreatedNovedad()
             },
         )
+        destino == DESTINO_PERIODOS -> PeriodosScreen(
+            user = state.user,
+            state = periodosState,
+            onBack = { destino = DESTINO_INICIO },
+            onRefresh = onRefreshPeriodos,
+            onSearch = onSearchPeriodos,
+        )
         else -> HomeScreen(
             user = state.user,
             loggingOut = state.working,
@@ -137,6 +151,10 @@ fun PlanillaApp(
             onOpenNuevaNovedad = {
                 destino = DESTINO_NUEVA_NOVEDAD
                 onOpenNuevaNovedad()
+            },
+            onOpenPeriodos = {
+                destino = DESTINO_PERIODOS
+                onOpenPeriodos()
             },
             onLogout = {
                 destino = DESTINO_INICIO
@@ -290,6 +308,7 @@ private fun HomeScreen(
     onOpenColaboradores: () -> Unit,
     onOpenNovedades: () -> Unit,
     onOpenNuevaNovedad: () -> Unit,
+    onOpenPeriodos: () -> Unit,
     onLogout: () -> Unit,
 ) {
     LazyColumn(
@@ -377,6 +396,13 @@ private fun HomeScreen(
                 onClick = onOpenNovedades,
             )
         }
+        item {
+            ModuleCard(
+                title = "Períodos",
+                description = "Consulta los meses disponibles y su estado actual.",
+                onClick = onOpenPeriodos,
+            )
+        }
         if (user.puedeModificar) {
             item {
                 ModuleCard(
@@ -388,7 +414,7 @@ private fun HomeScreen(
         }
         item {
             Text(
-                text = "Los períodos, la validación y las exportaciones se incorporarán en las siguientes etapas.",
+                text = "Las exportaciones se incorporarán en la siguiente etapa.",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodySmall,
             )
@@ -609,6 +635,191 @@ private fun ColaboradorCard(colaborador: ColaboradorMovil) {
                     } else {
                         MaterialTheme.colorScheme.onErrorContainer
                     },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PeriodosScreen(
+    user: UsuarioMovil,
+    state: PeriodosUiState,
+    onBack: () -> Unit,
+    onRefresh: () -> Unit,
+    onSearch: (String) -> Unit,
+) {
+    BackHandler(onBack = onBack)
+
+    val filtrados = remember(state.query, state.periodos) {
+        val texto = state.query.trim()
+        if (texto.isBlank()) {
+            state.periodos
+        } else {
+            state.periodos.filter { periodo ->
+                periodo.nombreMes.contains(texto, ignoreCase = true) ||
+                    periodo.anio.toString().contains(texto) ||
+                    periodo.descripcion.contains(texto, ignoreCase = true) ||
+                    periodo.sucursalNombre.contains(texto, ignoreCase = true) ||
+                    periodo.estado.contains(texto, ignoreCase = true) ||
+                    periodo.fechaInicio.contains(texto)
+            }
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .safeDrawingPadding()
+            .padding(horizontal = 20.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        TextButton(onClick = onBack) {
+            Text("← Volver al panel")
+        }
+        Text(
+            text = "Períodos de liquidación",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            text = user.sucursal?.nombre ?: "Todas las sucursales autorizadas",
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        OutlinedTextField(
+            value = state.query,
+            onValueChange = onSearch,
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("Buscar mes, año, sucursal o estado") },
+            singleLine = true,
+        )
+
+        when {
+            state.loading -> Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularProgressIndicator()
+                    Spacer(Modifier.height(12.dp))
+                    Text("Consultando períodos…")
+                }
+            }
+
+            state.errorMessage != null -> Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Text(
+                        text = state.errorMessage,
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center,
+                    )
+                    Button(onClick = onRefresh) {
+                        Text("Intentar nuevamente")
+                    }
+                }
+            }
+
+            else -> {
+                val abiertos = filtrados.count { it.estado == "ABIERTO" }
+                Text(
+                    text = "Mostrando ${filtrados.size} de ${state.total} · Abiertos: $abiertos",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                if (filtrados.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = "No se encontraron períodos.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(bottom = 20.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        items(
+                            items = filtrados,
+                            key = { it.id },
+                        ) { periodo ->
+                            PeriodoCard(periodo)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PeriodoCard(periodo: PeriodoMovil) {
+    val estadoContainer = when (periodo.estado) {
+        "ABIERTO" -> MaterialTheme.colorScheme.primaryContainer
+        "EXPORTADO" -> MaterialTheme.colorScheme.tertiaryContainer
+        else -> MaterialTheme.colorScheme.secondaryContainer
+    }
+    val estadoContent = when (periodo.estado) {
+        "ABIERTO" -> MaterialTheme.colorScheme.onPrimaryContainer
+        "EXPORTADO" -> MaterialTheme.colorScheme.onTertiaryContainer
+        else -> MaterialTheme.colorScheme.onSecondaryContainer
+    }
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        tonalElevation = 2.dp,
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Text(
+                text = "${periodo.nombreMes} ${periodo.anio}",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                text = "Sucursal: ${periodo.sucursalNombre}",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = "Inicio: ${periodo.fechaInicio}",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            periodo.fechaCierreLegible?.let { fecha ->
+                Text(
+                    text = "Cierre: $fecha",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Surface(
+                shape = MaterialTheme.shapes.small,
+                color = estadoContainer,
+            ) {
+                Text(
+                    text = periodo.estado.lowercase()
+                        .replaceFirstChar { it.uppercase() },
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = estadoContent,
                 )
             }
         }

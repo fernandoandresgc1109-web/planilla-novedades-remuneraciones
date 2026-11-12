@@ -165,3 +165,15 @@ Cuando la operación termina, la tarjeta se actualiza inmediatamente con el nuev
 ### Explicación para la sustentación
 
 > Desde Android se puede validar o anular una novedad, pero el teléfono no decide por sí solo. Django indica qué acciones están disponibles y vuelve a revisar los permisos antes de cambiar el estado. La anulación exige un motivo y el sistema conserva quién realizó la acción y cuándo, lo que protege la trazabilidad del proceso.
+
+## 13. Séptima etapa: consulta de períodos
+
+El panel móvil incorpora una consulta de períodos de liquidación. Cada tarjeta muestra el mes, año, sucursal, fecha de inicio, fecha de cierre cuando existe y estado: abierto, cerrado o exportado.
+
+La pantalla recorre todas las páginas entregadas por la API, permite buscar por mes, año, sucursal o estado e informa cuántos períodos visibles están abiertos. El módulo es de consulta para evitar cierres accidentales desde el teléfono.
+
+Django conserva el aislamiento multisucursal: un operador recibe únicamente los períodos de su sede, mientras que el administrador global puede consultar todas las sucursales autorizadas.
+
+### Explicación para la sustentación
+
+> El módulo de períodos permite saber desde el teléfono qué meses están abiertos, cerrados o exportados. Android organiza y busca la información, pero Django decide qué sucursales puede consultar cada usuario. Por seguridad, esta etapa no permite cerrar períodos desde el móvil.
