@@ -121,3 +121,26 @@ data class AnularNovedadRequest(
     @SerializedName("motivo_anulacion")
     val motivoAnulacion: String,
 )
+
+data class ExportacionMovil(
+    val id: Int,
+    val periodo: Int,
+    @SerializedName("periodo_descripcion")
+    val periodoDescripcion: String,
+    @SerializedName("sucursal_nombre")
+    val sucursalNombre: String,
+    @SerializedName("generado_por")
+    val generadoPor: Int,
+    @SerializedName("generado_por_nombre")
+    val generadoPorNombre: String,
+    @SerializedName("fecha_generacion")
+    val fechaGeneracion: String,
+    val formato: String,
+    @SerializedName("nombre_archivo")
+    val nombreArchivo: String,
+    @SerializedName("cantidad_registros")
+    val cantidadRegistros: Int,
+) {
+    val fechaGeneracionLegible: String
+        get() = fechaGeneracion.substringBefore("T")
+}

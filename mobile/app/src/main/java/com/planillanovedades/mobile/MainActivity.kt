@@ -9,6 +9,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.planillanovedades.mobile.ui.PlanillaApp
 import com.planillanovedades.mobile.ui.auth.AuthViewModel
 import com.planillanovedades.mobile.ui.colaboradores.ColaboradoresViewModel
+import com.planillanovedades.mobile.ui.exportaciones.ExportacionesViewModel
 import com.planillanovedades.mobile.ui.novedades.NovedadesViewModel
 import com.planillanovedades.mobile.ui.novedades.NuevaNovedadViewModel
 import com.planillanovedades.mobile.ui.periodos.PeriodosViewModel
@@ -40,6 +41,11 @@ class MainActivity : ComponentActivity() {
         PeriodosViewModel.Factory(repository)
     }
 
+    private val exportacionesViewModel: ExportacionesViewModel by viewModels {
+        val repository = (application as PlanillaApplication).exportacionRepository
+        ExportacionesViewModel.Factory(repository)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -55,6 +61,8 @@ class MainActivity : ComponentActivity() {
                     .collectAsStateWithLifecycle().value
                 val periodosState = periodosViewModel.uiState
                     .collectAsStateWithLifecycle().value
+                val exportacionesState = exportacionesViewModel.uiState
+                    .collectAsStateWithLifecycle().value
 
                 PlanillaApp(
                     state = authState,
@@ -62,12 +70,14 @@ class MainActivity : ComponentActivity() {
                     novedadesState = novedadesState,
                     nuevaNovedadState = nuevaNovedadState,
                     periodosState = periodosState,
+                    exportacionesState = exportacionesState,
                     onLogin = authViewModel::login,
                     onLogout = {
                         colaboradoresViewModel.clear()
                         novedadesViewModel.clear()
                         nuevaNovedadViewModel.clear()
                         periodosViewModel.clear()
+                        exportacionesViewModel.clear()
                         authViewModel.logout()
                     },
                     onDismissError = authViewModel::dismissError,
@@ -111,6 +121,13 @@ class MainActivity : ComponentActivity() {
                         periodosViewModel.load(force = true)
                     },
                     onSearchPeriodos = periodosViewModel::updateQuery,
+                    onOpenExportaciones = {
+                        exportacionesViewModel.load()
+                    },
+                    onRefreshExportaciones = {
+                        exportacionesViewModel.load(force = true)
+                    },
+                    onSearchExportaciones = exportacionesViewModel::updateQuery,
                 )
             }
         }

@@ -2,6 +2,7 @@ package com.planillanovedades.mobile.data.repository
 
 import com.planillanovedades.mobile.data.model.AnularNovedadRequest
 import com.planillanovedades.mobile.data.model.ColaboradorMovil
+import com.planillanovedades.mobile.data.model.ExportacionMovil
 import com.planillanovedades.mobile.data.model.LoginRequest
 import com.planillanovedades.mobile.data.model.LoginResponse
 import com.planillanovedades.mobile.data.model.NovedadMovil
@@ -77,6 +78,10 @@ private class FakePeriodosApiService : ApiService {
     override suspend fun tiposNovedad(
         page: Int,
     ): PaginatedResponse<TipoNovedadMovil> = emptyResponse()
+
+    override suspend fun exportaciones(
+        page: Int,
+    ): PaginatedResponse<ExportacionMovil> = emptyResponse()
 
     override suspend fun crearNovedad(
         request: NuevaNovedadRequest,

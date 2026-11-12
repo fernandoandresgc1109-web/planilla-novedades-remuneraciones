@@ -177,3 +177,17 @@ Django conserva el aislamiento multisucursal: un operador recibe únicamente los
 ### Explicación para la sustentación
 
 > El módulo de períodos permite saber desde el teléfono qué meses están abiertos, cerrados o exportados. Android organiza y busca la información, pero Django decide qué sucursales puede consultar cada usuario. Por seguridad, esta etapa no permite cerrar períodos desde el móvil.
+
+## 14. Octava etapa: historial de exportaciones
+
+Los perfiles con permiso de exportación pueden consultar desde Android el historial de archivos generados. Cada tarjeta muestra el nombre del archivo, período, sucursal, formato, cantidad de registros, fecha y usuario responsable.
+
+La pantalla recorre todas las páginas de la API y permite buscar por archivo, período, sucursal, formato, fecha o responsable. El acceso no se muestra a usuarios sin permiso de exportación.
+
+Este módulo es de solo lectura. La generación y descarga de archivos permanecen en la aplicación web para evitar operaciones accidentales desde el teléfono y conservar un flujo administrativo controlado.
+
+Django aplica el aislamiento multisucursal antes de entregar los resultados. Android presenta la información autorizada, pero no decide qué sedes puede consultar el usuario.
+
+### Explicación para la sustentación
+
+> El historial móvil permite comprobar qué archivo se generó, para qué período y sucursal, cuántos registros contiene y quién lo creó. La aplicación Android solo presenta la información; Django filtra las sucursales y verifica el permiso de exportación. La generación del archivo continúa en la versión web para mantener un proceso más controlado.

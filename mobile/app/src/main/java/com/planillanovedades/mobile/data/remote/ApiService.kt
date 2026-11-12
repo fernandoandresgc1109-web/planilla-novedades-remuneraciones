@@ -2,6 +2,7 @@ package com.planillanovedades.mobile.data.remote
 
 import com.planillanovedades.mobile.data.model.ColaboradorMovil
 import com.planillanovedades.mobile.data.model.AnularNovedadRequest
+import com.planillanovedades.mobile.data.model.ExportacionMovil
 import com.planillanovedades.mobile.data.model.LoginRequest
 import com.planillanovedades.mobile.data.model.LoginResponse
 import com.planillanovedades.mobile.data.model.NovedadMovil
@@ -46,6 +47,11 @@ interface ApiService {
     suspend fun tiposNovedad(
         @Query("page") page: Int = 1,
     ): PaginatedResponse<TipoNovedadMovil>
+
+    @GET("api/exportaciones/")
+    suspend fun exportaciones(
+        @Query("page") page: Int = 1,
+    ): PaginatedResponse<ExportacionMovil>
 
     @POST("api/novedades/")
     suspend fun crearNovedad(

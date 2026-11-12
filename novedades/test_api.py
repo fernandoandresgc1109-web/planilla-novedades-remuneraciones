@@ -367,6 +367,18 @@ class ApiRestTests(APITestCase):
             respuesta_detalle.status_code,
             status.HTTP_200_OK,
         )
+        self.assertEqual(
+            respuesta_detalle.data["periodo_descripcion"],
+            "08/2026",
+        )
+        self.assertEqual(
+            respuesta_detalle.data["sucursal_nombre"],
+            self.sucursal.nombre,
+        )
+        self.assertEqual(
+            respuesta_detalle.data["generado_por_nombre"],
+            self.usuario.username,
+        )
 
     def test_api_no_permite_crear_exportaciones_manualmente(self):
         self.autenticar()

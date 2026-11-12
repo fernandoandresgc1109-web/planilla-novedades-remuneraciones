@@ -5,6 +5,7 @@ import com.planillanovedades.mobile.data.remote.ApiService
 import com.planillanovedades.mobile.data.remote.AuthInterceptor
 import com.planillanovedades.mobile.data.repository.AuthRepository
 import com.planillanovedades.mobile.data.repository.ColaboradorRepository
+import com.planillanovedades.mobile.data.repository.ExportacionRepository
 import com.planillanovedades.mobile.data.repository.NovedadRepository
 import com.planillanovedades.mobile.data.repository.NuevaNovedadRepository
 import com.planillanovedades.mobile.data.repository.PeriodoRepository
@@ -30,6 +31,9 @@ class PlanillaApplication : Application() {
     lateinit var periodoRepository: PeriodoRepository
         private set
 
+    lateinit var exportacionRepository: ExportacionRepository
+        private set
+
     override fun onCreate() {
         super.onCreate()
 
@@ -53,5 +57,6 @@ class PlanillaApplication : Application() {
         novedadRepository = NovedadRepository(apiService)
         nuevaNovedadRepository = NuevaNovedadRepository(apiService)
         periodoRepository = PeriodoRepository(apiService)
+        exportacionRepository = ExportacionRepository(apiService)
     }
 }

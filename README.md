@@ -141,7 +141,7 @@ La aplicación web se conservará como sistema central y panel administrativo. L
 
 La API incorpora autenticación por token para Android, consulta del usuario activo y cierre de sesión móvil. El cliente Android nativo incluye inicio de sesión, conservación cifrada del token, recuperación de sesión y visualización del rol, la sucursal y los permisos. La autenticación por sesión de la interfaz web se mantiene sin cambios.
 
-El panel móvil permite consultar colaboradores, períodos y novedades, registrar novedades en borrador y gestionar sus estados cuando el perfil tiene permiso de modificación. La aplicación recorre la paginación de la API, ofrece búsqueda local y muestra únicamente los datos que Django autoriza según el rol y la sede. El formulario utiliza períodos abiertos, colaboradores activos de la misma sucursal y tipos vigentes; Django valida nuevamente todos los datos antes de guardarlos. La validación y la anulación requieren confirmación, y el motivo de anulación queda registrado para auditoría.
+El panel móvil permite consultar colaboradores, períodos, novedades y el historial de exportaciones, registrar novedades en borrador y gestionar sus estados cuando el perfil tiene permiso de modificación. La aplicación recorre la paginación de la API, ofrece búsqueda local y muestra únicamente los datos que Django autoriza según el rol y la sede. El formulario utiliza períodos abiertos, colaboradores activos de la misma sucursal y tipos vigentes; Django valida nuevamente todos los datos antes de guardarlos. La validación y la anulación requieren confirmación, y el motivo de anulación queda registrado para auditoría.
 
 ## Seguridad implementada
 
@@ -215,6 +215,7 @@ Los archivos reales utilizados para analizar el proceso no se incluyen en el rep
 - [x] Registro móvil de novedades en borrador.
 - [x] Validación y anulación de novedades desde Android.
 - [x] Consulta móvil de períodos de liquidación.
+- [x] Consulta móvil del historial de exportaciones.
 - [ ] Pruebas y demostración de la aplicación móvil.
 - [ ] Presentación y entrega final.
 
@@ -244,6 +245,7 @@ Los archivos reales utilizados para analizar el proceso no se incluyen en el rep
 | 11-11-2026 | Registro móvil de novedades | Se incorporó un formulario Android para usuarios con permiso de modificación; se cargan períodos abiertos, colaboradores activos y tipos vigentes, se filtran las personas por sucursal y Django valida nuevamente la integridad, el rol y los campos requeridos antes de guardar el borrador. |
 | 12-11-2026 | Gestión móvil de estados | Se conectaron las acciones de validación y anulación con confirmación, motivo obligatorio y actualización inmediata del listado; Django continúa comprobando el rol, la sucursal y las transiciones permitidas, y conserva la auditoría de cada acción. |
 | 12-11-2026 | Consulta móvil de períodos | Se incorporó un módulo de consulta con mes, año, sucursal, fechas y estado; incluye búsqueda, conteo de períodos abiertos y paginación completa, mientras Django conserva el filtrado multisucursal. |
+| 12-11-2026 | Historial móvil de exportaciones | Se incorporó una consulta de los archivos generados con período, sucursal, formato, cantidad de registros, fecha y usuario responsable; la pantalla es de solo lectura y aparece únicamente para perfiles con permiso de exportación. |
 
 ## Consideraciones de privacidad
 
