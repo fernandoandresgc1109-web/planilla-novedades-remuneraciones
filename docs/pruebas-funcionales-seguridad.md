@@ -251,3 +251,50 @@ La aplicación:
 - No presenta hallazgos en el análisis estático de seguridad.
 
 El proyecto se encuentra preparado para continuar con la documentación final y la configuración del entorno de despliegue.
+
+
+---
+
+## 11. Verificación manual de la aplicación Android (13-11-2026)
+
+Esta sección amplía el acta inicial del 28-08-2026 sin sustituir sus resultados históricos. La verificación se realizó en **Android Studio**, con el emulador **Medium Phone API 37.0**, sobre el cliente Kotlin/Jetpack Compose conectado a la API REST de Django. Las acciones de escritura se realizaron con registros de demostración; no se utilizaron datos laborales reales para la prueba.
+
+### 11.1 Pruebas automáticas y compilación
+
+- Backend: ejecución local de `python manage.py test novedades` el 13-11-2026: **120 pruebas**, **0 errores**, resultado **OK**, en 52,319 segundos; Django informó `System check identified no issues (0 silenced)`.
+- Android: el workflow de GitHub Actions **«Verificar Android»** del PR #22 terminó correctamente. El trabajo **«Pruebas y compilación»**, incluido el paso **«Ejecutar pruebas y compilar APK»**, finalizó con resultado **success**. [Ejecución en GitHub Actions](https://github.com/fernandoandresgc1109-web/planilla-novedades-remuneraciones/actions/runs/43298757557).
+- El PR #22 se fusionó a `main` mediante el commit `5700fc9`.
+
+Estas evidencias **no sustituyen** las pruebas manuales de permisos por rol ni las pruebas en un dispositivo físico.
+
+### 11.2 Pruebas manuales realizadas
+
+| ID | Función | Comprobación y observación | Resultado |
+|---|---|---|---|
+| AM-01 | Autenticación | Inicio de sesión y acceso al panel principal en el emulador. | Aprobada |
+| AM-02 | Períodos | Consulta de 8 períodos, de los cuales 2 aparecen abiertos, con sus estados y sucursales. | Aprobada |
+| AM-03 | Historial de exportaciones | Consulta de 8 registros, con nombre del archivo, período, sucursal, formato, cantidad, fecha y responsable. | Aprobada |
+| AM-04 | Búsqueda de exportaciones | Filtro por `puente_alto`; al borrar la búsqueda vuelve el listado completo. | Aprobada |
+| AM-05 | Listado de novedades | Consulta de 11 novedades y visualización de estados, montos y motivos de anulación. | Aprobada |
+| AM-06 | Opciones del formulario | Selección de período abierto `12/2026` de Sucursal Demostración, colaboradora ficticia Ana Demostración y tipo Bono Demostración. | Aprobada |
+| AM-07 | Validación de campos | El formulario solicita un monto obligatorio al intentar guardar el bono sin valor. | Aprobada |
+| AM-08 | Registro | Creación del bono ficticio por $15.000, con fechas opcionales vacías, como borrador. | Aprobada |
+| AM-09 | Validación de novedad | Cambio del registro ficticio de Borrador a Validada mediante la acción de la aplicación. | Aprobada |
+| AM-10 | Anulación de novedad | Anulación del mismo registro y visualización del motivo ingresado. | Aprobada |
+| AM-11 | Colaboradores | Consulta del listado, búsqueda de `Ana` y restauración del listado completo al borrar la búsqueda. | Aprobada |
+| AM-12 | Cierre de sesión | Al cerrar sesión y reabrir la aplicación se solicita nuevamente autenticación. | Aprobada |
+| AM-13 | Retorno a la aplicación | Al volver a abrir la aplicación desde la pantalla de inicio de Android sin cerrar sesión, se conserva el acceso al panel. | Aprobada |
+
+**Alcance de la evidencia:** resultados verificados visualmente por la persona que ejecutó la prueba en el emulador y comunicados durante la sesión. Las capturas compartidas en la revisión no se han añadido como archivos al repositorio; por ello no se presentan como adjuntos versionados.
+
+### 11.3 Incidencias del entorno durante la prueba
+
+El emulador API 37 presentó bloqueos durante su arranque y un aviso de que Pixel Launcher no respondía. Se cerró el proceso de emulación bloqueado, se reinició el dispositivo virtual mediante arranque en frío y la aplicación volvió a ejecutarse. No se ha establecido que la causa fuera el código de la aplicación.
+
+### 11.4 Comprobaciones aún pendientes
+
+- **AM-14 — Permisos por perfil y sucursal:** repetir las consultas y el acceso a Exportaciones con un usuario de prueba sin permiso de exportación y con un operador restringido a una sucursal. No se dispone todavía de esa comprobación manual; no debe marcarse como aprobada.
+- **AM-15 — Restauración tras detener el proceso:** forzar el cierre del proceso de la aplicación desde Android y abrirla otra vez, sin pulsar «Cerrar sesión», para verificar que el token persistente recupera la sesión. La prueba AM-13 solo comprueba el retorno desde la pantalla de inicio, no una terminación real.
+- **Demostración final:** preparar capturas seleccionadas de la interfaz sin credenciales ni datos sensibles y realizar una presentación del flujo completo. Una prueba en dispositivo físico es recomendable, pero no se ha realizado en esta sesión.
+
+**Conclusión parcial:** las funciones básicas de consulta, registro, validación, anulación, búsqueda y sesión probadas manualmente en el emulador funcionaron. La validación funcional móvil sigue **en curso** hasta completar las comprobaciones pendientes.
