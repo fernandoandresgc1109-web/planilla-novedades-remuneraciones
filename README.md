@@ -256,7 +256,6 @@ Los archivos reales utilizados para analizar el proceso no se incluyen en el rep
 | 12-11-2026 | Gestión móvil de estados | Se conectaron las acciones de validación y anulación con confirmación, motivo obligatorio y actualización inmediata del listado; Django continúa comprobando el rol, la sucursal y las transiciones permitidas, y conserva la auditoría de cada acción. |
 | 12-11-2026 | Consulta móvil de períodos | Se incorporó un módulo de consulta con mes, año, sucursal, fechas y estado; incluye búsqueda, conteo de períodos abiertos y paginación completa, mientras Django conserva el filtrado multisucursal. |
 | 12-11-2026 | Historial móvil de exportaciones | Se incorporó una consulta de los archivos generados con período, sucursal, formato, cantidad de registros, fecha y usuario responsable; la pantalla es de solo lectura y aparece únicamente para perfiles con permiso de exportación. |
-
 | 13-11-2026 | Pruebas manuales de Android | Se completaron 13 comprobaciones del cliente Android en el emulador: consultas, búsquedas, formularios, novedad ficticia completa y sesiones; se ejecutaron 120 pruebas Django sin errores y se verificó el workflow Android del PR #22. Se documentaron por separado las pruebas de perfiles, el cierre forzado de la aplicación y la demostración final todavía pendientes. |
 
 ## Consideraciones de privacidad
