@@ -143,6 +143,16 @@ La API incorpora autenticación por token para Android, consulta del usuario act
 
 El panel móvil permite consultar colaboradores, períodos, novedades y el historial de exportaciones, registrar novedades en borrador y gestionar sus estados cuando el perfil tiene permiso de modificación. La aplicación recorre la paginación de la API, ofrece búsqueda local y muestra únicamente los datos que Django autoriza según el rol y la sede. El formulario utiliza períodos abiertos, colaboradores activos de la misma sucursal y tipos vigentes; Django valida nuevamente todos los datos antes de guardarlos. La validación y la anulación requieren confirmación, y el motivo de anulación queda registrado para auditoría.
 
+## Verificación Android del 13 de noviembre de 2026
+
+Se realizaron pruebas manuales en el emulador Medium Phone API 37.0. Se comprobaron el inicio y cierre de sesión, la vuelta a la aplicación desde la pantalla de inicio, la consulta de períodos, exportaciones, colaboradores y novedades, las búsquedas, las validaciones de campos y el ciclo de una novedad ficticia (borrador, validación y anulación). **13 comprobaciones manuales aprobadas.**
+
+También se ejecutaron **120 pruebas Django con resultado OK** y el workflow **Verificar Android** del PR #22 finalizó correctamente con pruebas y compilación del APK.
+
+**Pendientes:** verificación manual de permisos con perfiles y sucursales distintos; recuperación de sesión después de detener completamente el proceso de Android; preparación de evidencias visuales y demostración final. No se han dado por completadas estas comprobaciones.
+
+Detalle: [Pruebas funcionales y de seguridad, sección 11](docs/pruebas-funcionales-seguridad.md#11-verificación-manual-de-la-aplicación-android-13-11-2026).
+
 ## Seguridad implementada
 
 La aplicación utiliza autenticación mediante sesiones seguras de Django y permisos para usuarios autenticados.
@@ -246,6 +256,8 @@ Los archivos reales utilizados para analizar el proceso no se incluyen en el rep
 | 12-11-2026 | Gestión móvil de estados | Se conectaron las acciones de validación y anulación con confirmación, motivo obligatorio y actualización inmediata del listado; Django continúa comprobando el rol, la sucursal y las transiciones permitidas, y conserva la auditoría de cada acción. |
 | 12-11-2026 | Consulta móvil de períodos | Se incorporó un módulo de consulta con mes, año, sucursal, fechas y estado; incluye búsqueda, conteo de períodos abiertos y paginación completa, mientras Django conserva el filtrado multisucursal. |
 | 12-11-2026 | Historial móvil de exportaciones | Se incorporó una consulta de los archivos generados con período, sucursal, formato, cantidad de registros, fecha y usuario responsable; la pantalla es de solo lectura y aparece únicamente para perfiles con permiso de exportación. |
+
+| 13-11-2026 | Pruebas manuales de Android | Se completaron 13 comprobaciones del cliente Android en el emulador: consultas, búsquedas, formularios, novedad ficticia completa y sesiones; se ejecutaron 120 pruebas Django sin errores y se verificó el workflow Android del PR #22. Se documentaron por separado las pruebas de perfiles, el cierre forzado de la aplicación y la demostración final todavía pendientes. |
 
 ## Consideraciones de privacidad
 
