@@ -44,11 +44,13 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.planillanovedades.mobile.data.model.ColaboradorMovil
+import com.planillanovedades.mobile.data.model.ExportacionMovil
 import com.planillanovedades.mobile.data.model.NovedadMovil
 import com.planillanovedades.mobile.data.model.PeriodoMovil
 import com.planillanovedades.mobile.data.model.UsuarioMovil
 import com.planillanovedades.mobile.ui.auth.AuthUiState
 import com.planillanovedades.mobile.ui.colaboradores.ColaboradoresUiState
+import com.planillanovedades.mobile.ui.exportaciones.ExportacionesUiState
 import com.planillanovedades.mobile.ui.novedades.NovedadesUiState
 import com.planillanovedades.mobile.ui.novedades.NuevaNovedadFormData
 import com.planillanovedades.mobile.ui.novedades.NuevaNovedadScreen
@@ -60,6 +62,7 @@ private const val DESTINO_COLABORADORES = "colaboradores"
 private const val DESTINO_NOVEDADES = "novedades"
 private const val DESTINO_NUEVA_NOVEDAD = "nueva_novedad"
 private const val DESTINO_PERIODOS = "periodos"
+private const val DESTINO_EXPORTACIONES = "exportaciones"
 
 @Composable
 fun PlanillaApp(
@@ -68,6 +71,7 @@ fun PlanillaApp(
     novedadesState: NovedadesUiState,
     nuevaNovedadState: NuevaNovedadUiState,
     periodosState: PeriodosUiState,
+    exportacionesState: ExportacionesUiState,
     onLogin: (String, String) -> Unit,
     onLogout: () -> Unit,
     onDismissError: () -> Unit,
@@ -88,6 +92,9 @@ fun PlanillaApp(
     onOpenPeriodos: () -> Unit,
     onRefreshPeriodos: () -> Unit,
     onSearchPeriodos: (String) -> Unit,
+    onOpenExportaciones: () -> Unit,
+    onRefreshExportaciones: () -> Unit,
+    onSearchExportaciones: (String) -> Unit,
 ) {
     var destino by rememberSaveable(state.user?.id) {
         mutableStateOf(DESTINO_INICIO)
@@ -137,6 +144,13 @@ fun PlanillaApp(
             onRefresh = onRefreshPeriodos,
             onSearch = onSearchPeriodos,
         )
+        destino == DESTINO_EXPORTACIONES -> ExportacionesScreen(
+            user = state.user,
+            state = exportacionesState,
+            onBack = { destino = DESTINO_INICIO },
+            onRefresh = onRefreshExportaciones,
+            onSearch = onSearchExportaciones,
+        )
         else -> HomeScreen(
             user = state.user,
             loggingOut = state.working,
@@ -155,6 +169,10 @@ fun PlanillaApp(
             onOpenPeriodos = {
                 destino = DESTINO_PERIODOS
                 onOpenPeriodos()
+            },
+            onOpenExportaciones = {
+                destino = DESTINO_EXPORTACIONES
+                onOpenExportaciones()
             },
             onLogout = {
                 destino = DESTINO_INICIO
@@ -309,6 +327,7 @@ private fun HomeScreen(
     onOpenNovedades: () -> Unit,
     onOpenNuevaNovedad: () -> Unit,
     onOpenPeriodos: () -> Unit,
+    onOpenExportaciones: () -> Unit,
     onLogout: () -> Unit,
 ) {
     LazyColumn(
@@ -412,12 +431,14 @@ private fun HomeScreen(
                 )
             }
         }
-        item {
-            Text(
-                text = "Las exportaciones se incorporarán en la siguiente etapa.",
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodySmall,
-            )
+        if (user.puedeExportar) {
+            item {
+                ModuleCard(
+                    title = "Exportaciones",
+                    description = "Consulta el historial de archivos generados.",
+                    onClick = onOpenExportaciones,
+                )
+            }
         }
         item {
             OutlinedButton(
@@ -820,6 +841,184 @@ private fun PeriodoCard(periodo: PeriodoMovil) {
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = estadoContent,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ExportacionesScreen(
+    user: UsuarioMovil,
+    state: ExportacionesUiState,
+    onBack: () -> Unit,
+    onRefresh: () -> Unit,
+    onSearch: (String) -> Unit,
+) {
+    BackHandler(onBack = onBack)
+
+    val filtradas = remember(state.query, state.exportaciones) {
+        val texto = state.query.trim()
+        if (texto.isBlank()) {
+            state.exportaciones
+        } else {
+            state.exportaciones.filter { exportacion ->
+                exportacion.nombreArchivo.contains(texto, ignoreCase = true) ||
+                    exportacion.periodoDescripcion.contains(texto, ignoreCase = true) ||
+                    exportacion.sucursalNombre.contains(texto, ignoreCase = true) ||
+                    exportacion.formato.contains(texto, ignoreCase = true) ||
+                    exportacion.generadoPorNombre.contains(texto, ignoreCase = true) ||
+                    exportacion.fechaGeneracionLegible.contains(texto, ignoreCase = true)
+            }
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .safeDrawingPadding()
+            .padding(horizontal = 20.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        TextButton(onClick = onBack) {
+            Text("← Volver al panel")
+        }
+        Text(
+            text = "Historial de exportaciones",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            text = user.sucursal?.nombre ?: "Todas las sucursales autorizadas",
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        OutlinedTextField(
+            value = state.query,
+            onValueChange = onSearch,
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("Buscar archivo, período, sucursal o formato") },
+            singleLine = true,
+        )
+
+        when {
+            state.loading -> Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularProgressIndicator()
+                    Spacer(Modifier.height(12.dp))
+                    Text("Consultando exportaciones…")
+                }
+            }
+
+            state.errorMessage != null -> Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Text(
+                        text = state.errorMessage,
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center,
+                    )
+                    Button(onClick = onRefresh) {
+                        Text("Intentar nuevamente")
+                    }
+                }
+            }
+
+            else -> {
+                Text(
+                    text = "Mostrando ${filtradas.size} de ${state.total}",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                if (filtradas.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = "No se encontraron exportaciones.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(bottom = 20.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        items(
+                            items = filtradas,
+                            key = { it.id },
+                        ) { exportacion ->
+                            ExportacionCard(exportacion)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ExportacionCard(exportacion: ExportacionMovil) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        tonalElevation = 2.dp,
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Text(
+                text = exportacion.nombreArchivo,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                text = "Período: ${exportacion.periodoDescripcion}",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = "Sucursal: ${exportacion.sucursalNombre}",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = "Registros: ${exportacion.cantidadRegistros}",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = "Generado por: ${exportacion.generadoPorNombre}",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = "Fecha: ${exportacion.fechaGeneracionLegible}",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Surface(
+                shape = MaterialTheme.shapes.small,
+                color = MaterialTheme.colorScheme.tertiaryContainer,
+            ) {
+                Text(
+                    text = exportacion.formato,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onTertiaryContainer,
                 )
             }
         }

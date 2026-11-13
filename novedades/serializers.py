@@ -308,12 +308,29 @@ class NovedadSerializer(serializers.ModelSerializer):
 
 
 class ExportacionSerializer(serializers.ModelSerializer):
+    periodo_descripcion = serializers.SerializerMethodField()
+    sucursal_nombre = serializers.CharField(
+        source="periodo.sucursal.nombre",
+        read_only=True,
+    )
+    generado_por_nombre = serializers.SerializerMethodField()
+
+    def get_periodo_descripcion(self, obj):
+        return f"{obj.periodo.mes:02d}/{obj.periodo.anio}"
+
+    def get_generado_por_nombre(self, obj):
+        nombre = obj.generado_por.get_full_name().strip()
+        return nombre or obj.generado_por.get_username()
+
     class Meta:
         model = Exportacion
         fields = (
             "id",
             "periodo",
+            "periodo_descripcion",
+            "sucursal_nombre",
             "generado_por",
+            "generado_por_nombre",
             "fecha_generacion",
             "formato",
             "nombre_archivo",

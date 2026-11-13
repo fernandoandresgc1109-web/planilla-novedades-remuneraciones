@@ -2,6 +2,7 @@ package com.planillanovedades.mobile.data.repository
 
 import com.planillanovedades.mobile.data.model.ColaboradorMovil
 import com.planillanovedades.mobile.data.model.AnularNovedadRequest
+import com.planillanovedades.mobile.data.model.ExportacionMovil
 import com.planillanovedades.mobile.data.model.LoginRequest
 import com.planillanovedades.mobile.data.model.LoginResponse
 import com.planillanovedades.mobile.data.model.NovedadMovil
@@ -121,6 +122,15 @@ private class FakeApiService : ApiService {
     override suspend fun tiposNovedad(
         page: Int,
     ): PaginatedResponse<TipoNovedadMovil> = PaginatedResponse(
+        count = 0,
+        next = null,
+        previous = null,
+        results = emptyList(),
+    )
+
+    override suspend fun exportaciones(
+        page: Int,
+    ): PaginatedResponse<ExportacionMovil> = PaginatedResponse(
         count = 0,
         next = null,
         previous = null,

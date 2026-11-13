@@ -104,6 +104,8 @@ El recurso de novedades no permite `DELETE`. Una novedad debe anularse para cons
 
 Para la presentación móvil, la respuesta de novedades incluye además campos de solo lectura: `periodo_descripcion`, `sucursal_nombre`, `colaborador_nombre`, `colaborador_rut`, `tipo_novedad_nombre`, `puede_validar` y `puede_anular`. Estos campos facilitan la lectura y permiten mostrar únicamente las acciones compatibles con el estado actual, pero no reemplazan las validaciones de permisos realizadas por Django.
 
+La consulta de exportaciones incluye los campos de solo lectura `periodo_descripcion`, `sucursal_nombre` y `generado_por_nombre`. Así, Android puede mostrar el historial con nombres comprensibles sin modificar relaciones ni reglas de acceso.
+
 Al crear o modificar una novedad, el servidor comprueba que el período esté abierto, que el colaborador esté activo y pertenezca a la misma sucursal, que el tipo de novedad esté vigente, que las fechas sean coherentes y que exista monto o cantidad cuando la unidad de medida lo requiera. Estas reglas se aplican aunque la solicitud no provenga de la interfaz oficial.
 
 ## 7. Campos de trazabilidad
